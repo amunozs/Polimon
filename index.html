@@ -399,7 +399,7 @@ const MOVES={
   comunismo:{name:'Comunismo o libertad',type:'cas',cat:'S',power:80,acc:100,pp:15,sec:{status:'brn',chance:.1},desc:'10% de quemar.',quip:'«¡Comunismo o libertad!»'},
   fruta:{name:'Me gusta la fruta',type:'cas',cat:'S',power:110,eruption:1,acc:100,pp:5,desc:'Hasta 110 de potencia; menos cuantos menos PS le queden. Siempre crítico contra Perro Sanxe.',quip:'«Me gusta la fruta.»'},
   cana:{name:'La libertad es una caña',type:'cas',cat:'X',pp:5,target:'field',eff:{kind:'weather',w:'sun'},desc:'Terrazas 5 turnos: lo Castizo pega más, lo Tuit menos, e Isabel se cura un poco cada turno.',quip:'Se abren las terrazas.'},
-  bocata:{name:'Bocata de calamares',type:'epi',cat:'S',power:60,acc:100,pp:10,drain:.5,desc:'Golpe fuerte y se cura con la mitad del daño.',quip:'Bocata de calamares en la Plaza Mayor.'},
+  bocata:{name:'Culpar al Gobierno central',type:'epi',cat:'S',power:60,acc:100,pp:10,drain:.5,desc:'Le echa la culpa a Moncloa y se cura con la mitad del daño.',quip:'¡Esto es culpa del Gobierno de Sánchez!'},
   obras:{name:'Obras en Madrid',type:'mit',cat:'X',pp:10,target:'field',eff:{kind:'obras'},desc:'Conos en el lado rival 3 turnos: no puede cambiar de político y pierde 1/8 de PS cada turno.',quip:'Corta la calle por obras.'},
   m360:{name:'Madrid 360',type:'mit',cat:'X',pp:20,target:'self',eff:{kind:'copycat'},desc:'Se disfraza del rival y repite el último ataque usado en el combate.',quip:'Copia la idea y le cambia el nombre.'},
   calderon:{name:'Cántico del Calderón',type:'mit',cat:'S',power:90,acc:100,pp:10,sound:1,desc:'Atraviesa a los dobles, como el chalet.',quip:'Se arranca con el himno del Atleti.'},
@@ -636,7 +636,23 @@ const FX={
   comunismo:async c=>{word('¡LIBERTAD!',up(c.b,52),{color:'#f08457',size:30,d:1100});await rain('🔥',c.b,{n:9,size:28,spread:90});await flashScr('#ff8a50',240);},
   fruta:async c=>{await all(...FRUITS.concat(FRUITS).map((f,i)=>fly(f,P(c.a.x,c.a.y-10),P(c.b.x+(Math.random()-.5)*40,c.b.y+(Math.random()-.5)*30),{d:520,size:26,arc:20+Math.random()*60,spin:360,delay:i*65})));shake(400,6);},
   cana:async c=>{await all(pop('🍺',P(c.a.x+30,c.a.y-40),{size:44,d:900,rot:-25}),pop('☀️',P(c.b.x,30),{size:46,d:1000}));},
-  bocata:async c=>{await fly('🥪',c.a,c.b,{d:520,size:36,arc:40,spin:200});await all(burst(['🦑','💥'],c.b,{n:6,size:24}),word('¡ÑAM!',up(c.b,46),{size:24,d:700}));await all(...[0,1,2,3].map(i=>fly('💚',c.b,c.a,{d:600,size:18,arc:(i-1.5)*20,delay:i*90,ease:'ease-out'})));},
+  bocata:async c=>{
+    const ang=Math.atan2(c.b.y-c.a.y,c.b.x-c.a.x)*180/Math.PI,mid=P(c.a.x+(c.b.x-c.a.x)*.55,c.a.y+(c.b.y-c.a.y)*.55);
+    SND.sfx('whoosh');
+    const fin=run(mk('👉',34),[{transform:T(c.a,.3,ang),opacity:1},{transform:T(mid,2.6,ang),opacity:1,offset:.22},{transform:T(mid,2.4,ang),opacity:1,offset:.3},{transform:T(mid,2.6,ang),opacity:1,offset:.85},{transform:T(mid,2.8,ang),opacity:0}],2300,{ease:'ease-out'});
+    lunge(c,{dist:28,d:320});
+    const W=$('#field').clientWidth,H=$('#field').clientHeight,cx=(x,m)=>Math.min(W-m,Math.max(m,x)),cy=y=>Math.min(H-24,Math.max(24,y));
+    const acc=[['¿LLUEVE?',-40,-46,'#67a9f2'],['¿ATASCO?',40,-12,'#f08457'],['¿ES LUNES?',-40,22,'#c3bcb1'],['¿PIERDE EL MADRID?',30,56,'#ffffff']];
+    const ws=acc.map(([t,dx,dy,col],i)=>{setTimeout(()=>SND.sfx('blipbeep'),(260+i*230)*FXS());return word(t,P(cx(c.b.x+dx,t.length*6+10),cy(c.b.y+dy)),{color:col,size:17,d:900,delay:260+i*230,rot:(i%2?6:-6)});});
+    await all(...ws);
+    setTimeout(()=>{SND.sfx('thud');shake(420,9);},330*FXS());
+    await all(
+      run(mk('🏛️',64),[{transform:T(P(c.b.x,c.b.y-190),1.3,-10),opacity:1},{transform:T(c.b,1.15,4),opacity:1,offset:.45},{transform:T(P(c.b.x,c.b.y+6),1.3,0),opacity:1,offset:.55},{transform:T(c.b,1.15,0),opacity:1,offset:.85},{transform:T(c.b,1.2,0),opacity:0}],1000,{ease:'ease-in'}),
+      burst(['💨','💢'],c.b,{n:8,r:70,size:22,d:700,delay:300}),
+      stamp('CULPA SUYA',P(cx(c.b.x,100),c.b.y-8),{d:1300,delay:420}),
+      fin);
+    await all(...[0,1,2,3].map(i=>fly('💚',c.b,c.a,{d:600,size:18,arc:(i-1.5)*20,delay:i*90,ease:'ease-out'})));
+  },
   obras:async c=>{await all(...[0,1,2,3,4].map(i=>fly('🚧',c.a,P(c.b.x-50+i*25,c.b.y+50),{d:600,size:26,arc:70,delay:i*90,ease:'ease-out'})),pop('👷',up(c.a,58),{size:34,d:900}));},
   m360:async c=>{const img=$('#sp'+c.s+' img');if(!img)return;const old=img.src;await all(sprA(c.s,[{transform:'none'},{transform:'rotate(360deg) scale(.8)'},{transform:'none'}],600),pop('🔄',up(c.a,62),{size:34,d:700}));img.src=IMG(B&&active(c.t)?active(c.t).p.id:'almeida');await all(word('¿Quién soy?',up(c.a,62),{size:20,d:900}),sleep(900));img.src=old;},
   calderon:async c=>{await all(...[0,1,2,3,4,5,6,7].map(i=>fly(i%2?'🎵':'🎶',c.a,c.b,{d:700,size:24,arc:(i%2?1:-1)*40,delay:i*90})),ring(c.a,{color:'#e5533d'}),ring(c.a,{color:'#ffffff',delay:200}),ring(c.b,{color:'#e5533d',delay:600}));},
