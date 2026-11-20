@@ -213,6 +213,7 @@ img{display:block;max-width:100%}
 .sidebars::before{left:0}.sidebars::after{right:0}
 .cap82{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);font-family:Georgia,serif;color:#fff;font-size:18px;background:#000a;padding:4px 10px;white-space:nowrap}
 .legcard{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;background:linear-gradient(135deg,#1c1a24,#3a2a00);border:3px solid #f3c34d;border-radius:12px;padding:12px 16px;box-shadow:0 0 30px #f3c34d88;min-width:220px}
+.rescard{position:absolute;left:50%;top:24%;transform:translate(-50%,-50%);text-align:center;background:linear-gradient(135deg,#7a0d12,#e5333d);border:3px solid #fff;border-radius:12px;padding:10px 14px;box-shadow:0 0 34px #ff3b3baa;width:78%;box-sizing:border-box;font-family:var(--display);color:#fff;font-size:21px;line-height:1.15;text-shadow:2px 2px 0 #0008}
 .legcard small{display:block;font-family:var(--display);color:var(--gold);font-size:13px;letter-spacing:2px}
 .legcard b{display:block;font-family:var(--display);color:#fff;font-size:24px;margin-top:4px}
 /* ---------- Desbloqueo ---------- */
@@ -359,7 +360,7 @@ const CHART={
   mit:{res:.5}
 };
 const ABIL={
-  robustez:{n:'Manual de Resistencia',d:'Con los PS al completo, aguanta cualquier golpe con 1 PS.'},
+  robustez:{n:'Manual de Resistencia',d:'La primera vez que va a caer, se queda con 1 PS. Venga de donde venga el golpe.'},
   estatica:{n:'Niebla gallega',d:'30% de dejar en blanco (paralizar) a quien le ataque cuerpo a cuerpo.'},
   marllamas:{n:'Sin complejos',d:'Con 1/3 de PS o menos, sus ataques Castizo hacen +50%.'},
   competitivo:{n:'Abucheo de Vicálvaro',d:'Si le bajan una estadística o le abuchean, se crece: sube su Ataque Esp.'},
@@ -685,6 +686,49 @@ async function legendIntro(s){
   },s);
   reveal();row.style.zIndex='';
 }
+async function resistCheck(){
+  if(!B||!B.teams)return;
+  for(const s of [0,1])for(const m of B.teams[s]){
+    if(!m.resistPending)continue;delete m.resistPending;renderPlates();
+    if(m===active(s))await resistFX(s);
+    await say(`¡${m.name} todavía resiste!`);
+  }
+}
+async function resistFX(s){
+  const el=$('#sp'+s),row=el.closest('.row');row.style.zIndex='7';
+  await fxRun(async c=>{
+    const f=$('#field'),W=f.clientWidth,H=f.clientHeight;
+    // 1) se desploma
+    const fall=el.animate([{transform:'none',filter:'none'},{transform:'translateY(18px) rotate(-78deg) scale(.92)',filter:'grayscale(1) brightness(.7)'}],{duration:650*FXS(),easing:'ease-in',fill:'forwards'});
+    const bk=document.createElement('div');bk.className='fxflash';bk.style.background='#000';bk.style.opacity='0';$('#fx').appendChild(bk);
+    SND.music(null);SND.sfx('flatline');
+    await bk.animate([{opacity:0},{opacity:.82}],{duration:500*FXS(),fill:'forwards'}).finished.catch(()=>{});
+    // 2) electrocardiograma: plano... y latido
+    const y=c.a.y-10,sx=W*.04,ex=W*.96,kx=c.a.x;
+    const pts=[[sx,y],[kx-30,y],[kx-20,y-8],[kx-12,y+6],[kx-4,y-62],[kx+6,y+38],[kx+14,y-14],[kx+22,y],[ex,y]].map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+    const e=document.createElement('div');e.className='fxi';
+    e.innerHTML=`<svg width="${W}" height="${H}" style="width:${W}px;height:${H}px;overflow:visible"><polyline pathLength="100" points="${pts}" fill="none" stroke="#3dff7a" stroke-width="4" stroke-linejoin="round" stroke-dasharray="100" stroke-dashoffset="100" style="filter:drop-shadow(0 0 6px #3dff7a)"/></svg>`;
+    $('#fx').appendChild(e);const pl=e.querySelector('polyline');
+    await pl.animate([{strokeDashoffset:100},{strokeDashoffset:52}],{duration:1100*FXS(),easing:'linear',fill:'forwards'}).finished.catch(()=>{});
+    await sleep(250);
+    SND.sfx('beat');
+    pl.animate([{strokeDashoffset:52},{strokeDashoffset:0}],{duration:500*FXS(),easing:'ease-out',fill:'forwards'});
+    await sleep(180);
+    // 3) ¡se levanta!
+    fall.cancel();
+    SND.sfx('fanfare');SND.sfx('thud');
+    const card=document.createElement('div');card.className='rescard';card.textContent=`¡${active(s).name} todavía resiste!`;card.style.opacity='0';$('#fx').appendChild(card);
+    await all(
+      bk.animate([{opacity:.82},{opacity:0}],{duration:450*FXS(),fill:'forwards'}).finished.catch(()=>{}),
+      sprA(s,[{transform:'translateY(18px) rotate(-78deg) scale(.92)'},{transform:'translateY(-34px) rotate(8deg) scale(1.3)',offset:.45},{transform:'translateY(0) rotate(-4deg) scale(.95)',offset:.75},{transform:'none'}],650,{ease:'ease-out'}),
+      flashScr('#ff3b3b',380),shake(520,10),ring(c.a,{color:'#ff3b3b',size:50,d:700}),ring(c.a,{color:'#ffffff',size:40,d:700,delay:150}),
+      burst(['🌹','✊','💪','🌹'],c.a,{n:10,r:80,size:26,d:900}),
+      run(card,[{opacity:0,transform:'translate(-50%,-50%) scale(3) rotate(-8deg)'},{opacity:1,transform:'translate(-50%,-50%) scale(1) rotate(-4deg)',offset:.12},{opacity:1,transform:'translate(-50%,-50%) scale(1.06) rotate(-4deg)',offset:.5},{opacity:1,transform:'translate(-50%,-50%) scale(1) rotate(-4deg)',offset:.88},{opacity:0,transform:'translate(-50%,-50%) scale(1) rotate(-4deg)'}],2100,{ease:'ease-out'}),
+      (async()=>{await sleep(300);await glow(s,'#ff3b3b',1500);})()
+    );
+  },s);
+  row.style.zIndex='';updateMusic();
+}
 async function transformPana(s){
   const u=active(s);
   SND.music(null);SND.sfx('tvon');
@@ -796,6 +840,8 @@ const SND=(()=>{
     blipbeep:()=>tone({f:1200,d:.04,v:.2}),
     printer:()=>{for(let i=0;i<5;i++)noise({d:.05,v:.4,f:3000,t:i*.06});},
     wobble:()=>tone({f:500,d:.7,type:'triangle',v:.35,vib:7,vibD:.25}),
+    flatline:()=>{tone({f:880,d:.09,type:'square',v:.14});tone({f:880,d:.09,type:'square',v:.14,t:.45});tone({f:880,d:1.1,type:'square',v:.14,t:.9});},
+    beat:()=>{tone({f:70,f2:40,d:.16,type:'sine',v:.9});tone({f:62,f2:36,d:.2,type:'sine',v:.8,t:.2});tone({f:1320,d:.08,type:'square',v:.12});},
     fanfare:()=>arp(['C5','E5','G5','C6','G5','C6'],{d:.14,v:.35,gap:.11}),
     sad:()=>{tone({f:392,f2:370,d:.3,type:'sawtooth',v:.25});tone({f:370,f2:349,d:.3,type:'sawtooth',v:.25,t:.32});tone({f:349,f2:262,d:.8,type:'sawtooth',v:.25,t:.64,vib:6});},
     cluck:()=>{for(let i=0;i<3;i++)tone({f:700,f2:500,d:.07,v:.3,t:i*.11});},
@@ -895,7 +941,7 @@ const label=m=>m.side===1?`${m.name} (rival)`:m.name;
 const isAway=m=>m.vol.away!==undefined;
 function mult(s){return s>=0?(2+s)/2:2/(2-s);}
 function stat(m,k,critMode){let s=m.stages[k];if(critMode==='atk'&&s<0)s=0;if(critMode==='def'&&s>0)s=0;let v=m.st[k]*mult(s);if(k==='spe'&&m.status==='par')v*=.5;return v;}
-function hurt(m,d){m.hp=Math.max(0,m.hp-d);}
+function hurt(m,d){if(d>0&&m.hp>0&&m.hp-d<=0&&m.p.ability==='robustez'&&!m.resisted){m.hp=1;m.resisted=true;m.resistPending=true;return;}m.hp=Math.max(0,m.hp-d);}
 function heal(m,d){m.hp=Math.min(m.max,m.hp+d);}
 function cancelCharge(u){if(u.vol.charging)u.vol.charging=null;}
 function calcDamage(u,t,mv,crit,rand){
@@ -1100,7 +1146,7 @@ async function attack(s,mv,id){
   }
   await playFX(id,s);
   const n=mv.multi===2?3+rnd(4):mv.multi?(r=>r<.35?2:r<.7?3:r<.85?4:5)(Math.random()):1;
-  let total=0,hitSub=false,anyCrit=false,sturdy=false,landed=0,capped=false,vaseNow=false;
+  let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false;
   for(let i=0;i<n;i++){
     if(t.hp<=0)break;
     const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24;
@@ -1110,14 +1156,13 @@ async function attack(s,mv,id){
       hitSub=true;SND.sfx('build');const d=Math.min(dmg,t.vol.sub);t.vol.sub-=d;total+=d;flash(1-s);
       if(t.vol.sub<=0){delete t.vol.sub;renderPlates();await say(`¡Se derrumba el chalet de ${label(t)}!`);}
     }else{
-      if(t.p.ability==='robustez'&&t.hp===t.max&&dmg>=t.hp){dmg=t.hp-1;sturdy=true;}
       if(t.vol.cap>0&&dmg>Math.floor(t.max/4)){dmg=Math.floor(t.max/4);capped=true;}
       if(t.p.ability==='jarron'&&!t.vased&&dmg>=t.hp){dmg=t.hp-1;vaseNow=true;}
       SND.hit(mv.cat==='P',eff(mv.type,t.types),crit);
       const d=Math.min(dmg,t.hp);hurt(t,d);total+=d;u.dealtTot=(u.dealtTot||0)+d;t.vol.lastHitType=mv.type;
       if(t.vol.otan)t.vol.otanHit=(t.vol.otanHit||0)+d;
       if(t.hp<=0)B.lastKO={by:u,victim:t,move:mv.name};flash(1-s);
-      if(vaseNow)break;
+      if(vaseNow||t.resistPending)break;
     }
     if(crit)anyCrit=true;landed++;renderPlates();
     if(mv.multi)await pause(330);
@@ -1129,7 +1174,7 @@ async function attack(s,mv,id){
   if(!hitSub){if(e>1)await say('¡Es súper eficaz! El argumento ha calado.');else if(e<1)await say('No es muy eficaz… nadie lo ha retuiteado.');}
   if(vaseNow){t.vased=true;t.vol={vase:2};t.stages={atk:0,def:0,spa:0,spd:0,spe:0};SND.sfx('gong');await fxRun(c=>all(pop('🏺',c.b,{size:90,d:1100}),word('JARRÓN CHINO',up(c.b,70),{size:24,d:1200})),s);renderPlates();await say(`¡${label(t)} se convierte en un jarrón chino!`,'Tiene mucho valor, pero nadie sabe dónde ponerlo. Aguantará los golpes un par de turnos.');return;}
   if(capped){await fxRun(c=>stamp('¡TOPE!',c.b),s);await say('¡TOPE! No se le puede cobrar más.',`Limitar alquileres protege a ${label(t)}.`);}
-  if(sturdy)await say(`¡${label(t)} aguanta con 1 PS!`,'Manual de Resistencia: con los PS al completo, no hay quien lo tumbe.');
+  await resistCheck();
   if(!hitSub)await stepAside(t);
   if(!hitSub&&t.hp>0){
     if(mv.type==='cas'&&t.status==='frz'){t.status=null;await say(`${label(t)} reacciona por fin.`);}
@@ -1235,6 +1280,7 @@ async function endTurn(){
   renderPlates();
 }
 async function faintCheck(){
+  await resistCheck();
   for(const s of [1,0]){const m=active(s);if(m.hp<=0&&!m.fainted){m.fainted=true;m.status=null;m.vol={};m.types=m.p.types.slice();if(m.p.id==='abascal')B.sides[s].publico=0;spriteOut(s);SND.sfx('faint');if(s===0&&m.p.legend)SND.music('battle');await say(`¡${label(m)} se queda sin argumentos!`,m.p.ko);}}
   if(B.teams[1].every(m=>m.hp<=0)){B.over=true;finish(true);return;}
   if(B.teams[0].every(m=>m.hp<=0)){B.over=true;finish(false);return;}
