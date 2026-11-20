@@ -354,115 +354,107 @@ img{display:block;max-width:100%}
 'use strict';
 /* =================== DATOS =================== */
 const TYPES={
-  res:{n:'Resistencia',e:'🛡️',c:'#a7b1c4'},
-  gal:{n:'Gallego',e:'🌫️',c:'#ecc659'},
-  cas:{n:'Castizo',e:'🍺',c:'#f08457'},
+  mit:{n:'Circo',e:'🎪',c:'#f08457'},
+  tui:{n:'Troll',e:'🧌',c:'#67a9f2'},
+  esc:{n:'Escaqueo',e:'🌫️',c:'#ad9ff3'},
+  cal:{n:'Calle',e:'✊',c:'#7dbb62'},
   epi:{n:'Épico',e:'🐎',c:'#c99766'},
-  asa:{n:'Asamblea',e:'✊',c:'#7dbb62'},
-  tui:{n:'Tuit',e:'🐦',c:'#67a9f2'},
-  hem:{n:'Hemeroteca',e:'📜',c:'#97d8e3'},
-  fug:{n:'Fuga',e:'🚗',c:'#ad9ff3'},
-  mit:{n:'Mitin',e:'🗣️',c:'#c3bcb1'}
+  est:{n:'Estado',e:'✨',c:'#c3bcb1'}
 };
-// Tabla real de Pokémon: Acero, Eléctrico, Fuego, Tierra, Planta, Agua, Hielo, Volador, Normal
+// Círculo: Circo > Troll > Escaqueo > Calle > Circo. Épico va aparte: ×1,5 a todos y recibe ×1,5 de todos
 const CHART={
-  res:{cas:.5,tui:.5,gal:.5,res:.5,hem:2},
-  gal:{tui:2,fug:2,gal:.5,asa:.5,epi:0},
-  cas:{asa:2,res:2,hem:2,cas:.5,tui:.5},
-  epi:{cas:2,gal:2,res:2,asa:.5,fug:0},
-  asa:{tui:2,epi:2,cas:.5,asa:.5,fug:.5,res:.5},
-  tui:{cas:2,epi:2,tui:.5,asa:.5},
-  hem:{asa:2,epi:2,fug:2,cas:.5,tui:.5,hem:.5,res:.5},
-  fug:{asa:2,gal:.5,res:.5},
-  mit:{res:.5}
+  mit:{tui:2,cal:.5},
+  tui:{esc:2,mit:.5},
+  esc:{cal:2,tui:.5},
+  cal:{mit:2,esc:.5}
 };
 const ABIL={
   robustez:{n:'Manual de Resistencia',d:'La primera vez que va a caer, se queda con 1 PS. Venga de donde venga el golpe.'},
   estatica:{n:'Niebla gallega',d:'30% de dejar en blanco (paralizar) a quien le ataque cuerpo a cuerpo.'},
-  marllamas:{n:'Sin complejos',d:'Con 1/3 de PS o menos, sus ataques Castizo hacen +50%.'},
+  marllamas:{n:'Sin complejos',d:'Con 1/3 de PS o menos, sus ataques Troll hacen +50%.'},
   competitivo:{n:'Abucheo de Vicálvaro',d:'Si le bajan una estadística o le abuchean, se crece: sube su Ataque Esp.'},
   aguante:{n:'Aguante',d:'Cada golpe que recibe le sube la Defensa.'},
-  espesura:{n:'Asalto final',d:'Con 1/3 de PS o menos, sus ataques Asamblea hacen +50%.'},
+  espesura:{n:'Asalto final',d:'Con 1/3 de PS o menos, sus ataques Calle hacen +50%.'},
   regeneracion:{n:'Paso al lado',d:'La primera vez que baja de la mitad de PS, se aparta un momento y recupera 1/3.'},
   intimidacion:{n:'Llegada triunfal',d:'Al entrar en combate, baja el Ataque del rival.'},
-  torrente:{n:'18 meses',d:'Cuando parece que se va, se crece: con 1/3 de PS o menos, Tuit +50%.'},
+  torrente:{n:'18 meses',d:'Cuando parece que se va, se crece: con 1/3 de PS o menos, Troll +50%.'},
   presion:{n:'Presión',d:'El rival gasta 2 PP por ataque intentando entenderle.'},
   jarron:{n:'Jarrón chino',d:'La primera vez que iba a caer, se convierte en jarrón chino: 2 turnos sin atacar aguantando los golpes, y vuelve con un 30% de vida.'},
   sindicalismo:{n:'Sindicalismo',d:'Quien la ataque cuerpo a cuerpo se topa con un piquete y pierde 1/8 de sus PS.'}
 };
-const PINCH={marllamas:'cas',espesura:'asa',torrente:'tui'};
+const PINCH={marllamas:'tui',espesura:'cal',torrente:'tui'};
 const PP_IDS=new Set(['feijoo','ayuso','almeida','rajoy']);
 const MOVES={
-  peugeot:{name:'Gira en Peugeot',type:'res',cat:'X',pp:5,target:'self',eff:{kind:'peugeot'},desc:'Se va de gira dos turnos: nadie le puede atacar y vuelve con el 60% de los PS recuperado.',quip:'Arranca el Peugeot y se va a recorrer España.'},
-  dondedije:{name:'Donde dije digo',type:'res',cat:'X',pp:10,target:'self',eff:{kind:'retype'},desc:'Cambia su tipo por uno que resista el último ataque que ha recibido.',quip:'Cambia de opinión… y de tipo.'},
-  tezanazo:{name:'Tezanazo',type:'res',cat:'P',power:80,acc:100,pp:15,secVol:{confuse:.2},desc:'20% de liar al rival.',quip:'Le cae encima una encuesta del CIS.'},
-  falcon:{name:'Vuelo en Falcon',type:'fug',cat:'P',power:120,acc:100,pp:15,contact:1,recoil:1/3,desc:'Se hace 1/3 del daño que causa.',quip:'Despega en el Falcon… rumbo a un concierto.'},
-  nisino:{name:'Ni sí ni no',type:'gal',cat:'S',power:110,acc:100,pp:10,coin:1,desc:'Moneda al aire: cara, golpe fuerte; cruz, le cura al rival.',quip:'¿Cara o cruz? Depende.'},
-  derogar:{name:'Derogar el sanchismo',type:'gal',cat:'S',power:90,acc:100,pp:15,sec:{status:'par',chance:.1},desc:'10% de dejar en blanco.',quip:'Promete derogarlo todo.'},
-  lluvia:{name:'Siempre llueve en Galicia',type:'gal',cat:'X',pp:5,target:'field',eff:{kind:'weather',w:'rain'},desc:'Lluvia 5 turnos: los ataques Gallego no fallan, los Tuit pegan más y los Castizo menos.',quip:'Se nubla todo el plató.'},
+  peugeot:{name:'Gira en Peugeot',type:'est',cat:'X',pp:5,target:'self',eff:{kind:'peugeot'},desc:'Se va de gira dos turnos: nadie le puede atacar y vuelve con el 60% de los PS recuperado.',quip:'Arranca el Peugeot y se va a recorrer España.'},
+  dondedije:{name:'Donde dije digo',type:'est',cat:'X',pp:10,target:'self',eff:{kind:'retype'},desc:'Cambia su tipo por uno que resista el último ataque que ha recibido.',quip:'Cambia de opinión… y de tipo.'},
+  tezanazo:{name:'Tezanazo',type:'mit',cat:'P',power:80,acc:100,pp:15,secVol:{confuse:.2},desc:'20% de liar al rival.',quip:'Le cae encima una encuesta del CIS.'},
+  falcon:{name:'Vuelo en Falcon',type:'esc',cat:'P',power:120,acc:100,pp:15,contact:1,recoil:1/3,desc:'Se hace 1/3 del daño que causa.',quip:'Despega en el Falcon… rumbo a un concierto.'},
+  nisino:{name:'Ni sí ni no',type:'esc',cat:'S',power:110,acc:100,pp:10,coin:1,desc:'Moneda al aire: cara, golpe fuerte; cruz, le cura al rival.',quip:'¿Cara o cruz? Depende.'},
+  derogar:{name:'Derogar el sanchismo',type:'mit',cat:'S',power:90,acc:100,pp:15,sec:{status:'par',chance:.1},desc:'10% de dejar en blanco.',quip:'Promete derogarlo todo.'},
+  lluvia:{name:'Siempre llueve en Galicia',type:'est',cat:'X',pp:5,target:'field',eff:{kind:'weather',w:'rain'},desc:'Lluvia 5 turnos: lo Escaqueo pega más y no falla; lo Calle pega la mitad (nadie va a la mani con lluvia).',quip:'Se nubla todo el plató.'},
   barco:{name:'Paseo en barco',type:'tui',cat:'S',power:90,acc:100,pp:10,desc:'Golpe fuerte. Con lluvia, pega más.',quip:'Una lancha cruza a toda velocidad.'},
-  comunismo:{name:'Comunismo o libertad',type:'cas',cat:'S',power:80,acc:100,pp:15,sec:{status:'brn',chance:.1},desc:'10% de quemar.',quip:'«¡Comunismo o libertad!»'},
-  fruta:{name:'Me gusta la fruta',type:'cas',cat:'S',power:110,eruption:1,acc:100,pp:5,desc:'Hasta 110 de potencia; menos cuantos menos PS le queden. Siempre crítico contra Perro Sanxe.',quip:'«Me gusta la fruta.»'},
-  cana:{name:'La libertad es una caña',type:'cas',cat:'X',pp:5,target:'field',eff:{kind:'weather',w:'sun'},desc:'Terrazas 5 turnos: lo Castizo pega más, lo Tuit menos, e Isabel se cura un poco cada turno.',quip:'Se abren las terrazas.'},
-  bocata:{name:'Culpar al Gobierno central',type:'epi',cat:'S',power:60,acc:100,pp:10,drain:.5,desc:'Le echa la culpa a Moncloa y se cura con la mitad del daño.',quip:'¡Esto es culpa del Gobierno de Sánchez!'},
-  obras:{name:'Obras en Madrid',type:'mit',cat:'X',pp:10,target:'field',eff:{kind:'obras'},desc:'Conos en el lado rival 3 turnos: no puede cambiar de político y pierde 1/8 de PS cada turno.',quip:'Corta la calle por obras.'},
-  m360:{name:'Madrid 360',type:'mit',cat:'X',pp:20,target:'self',eff:{kind:'copycat'},desc:'Se disfraza del rival y repite el último ataque usado en el combate.',quip:'Copia la idea y le cambia el nombre.'},
+  comunismo:{name:'Comunismo o libertad',type:'mit',cat:'S',power:80,acc:100,pp:15,sec:{status:'brn',chance:.1},desc:'10% de quemar.',quip:'«¡Comunismo o libertad!»'},
+  fruta:{name:'Me gusta la fruta',type:'tui',cat:'S',power:110,eruption:1,acc:100,pp:5,desc:'Hasta 110 de potencia; menos cuantos menos PS le queden. Siempre crítico contra Perro Sanxe.',quip:'«Me gusta la fruta.»'},
+  cana:{name:'La libertad es una caña',type:'est',cat:'X',pp:5,target:'field',eff:{kind:'weather',w:'sun'},desc:'Terrazas 5 turnos: lo Troll pega más (todos tuiteando desde la terraza), lo Escaqueo menos, e Isabel se cura un poco cada turno.',quip:'Se abren las terrazas.'},
+  bocata:{name:'Culpar al Gobierno central',type:'tui',cat:'S',power:60,acc:100,pp:10,drain:.5,desc:'Le echa la culpa a Moncloa y se cura con la mitad del daño.',quip:'¡Esto es culpa del Gobierno de Sánchez!'},
+  obras:{name:'Obras en Madrid',type:'est',cat:'X',pp:10,target:'field',eff:{kind:'obras'},desc:'Conos en el lado rival 3 turnos: no puede cambiar de político y pierde 1/8 de PS cada turno.',quip:'Corta la calle por obras.'},
+  m360:{name:'Madrid 360',type:'est',cat:'X',pp:20,target:'self',eff:{kind:'copycat'},desc:'Se disfraza del rival y repite el último ataque usado en el combate.',quip:'Copia la idea y le cambia el nombre.'},
   calderon:{name:'Cántico del Calderón',type:'mit',cat:'S',power:90,acc:100,pp:10,sound:1,desc:'Atraviesa a los dobles, como el chalet.',quip:'Se arranca con el himno del Atleti.'},
-  verbena:{name:'Verbena de San Isidro',type:'cas',cat:'S',power:85,acc:100,pp:15,sec:{status:'brn',chance:.1},desc:'10% de quemar.',quip:'Chotis, rosquillas y fuego.'},
+  verbena:{name:'Verbena de San Isidro',type:'cal',cat:'S',power:85,acc:100,pp:15,sec:{status:'brn',chance:.1},desc:'10% de quemar.',quip:'Chotis, rosquillas y fuego.'},
   caballo:{name:'Carga a caballo',type:'epi',cat:'P',power:95,acc:100,pp:10,contact:1,desc:'Embestida al galope, muy potente.',quip:'Carga al galope.'},
-  publico:{name:'Llevar su propio público',type:'epi',cat:'X',pp:5,target:'field',eff:{kind:'publico'},desc:'5 turnos (o hasta que se retire): le aplauden, sus ataques +30%, y al rival le abuchean (10% más de fallar).',quip:'Llegan los autobuses con su público.'},
-  derechita:{name:'Derechita cobarde',type:'res',cat:'P',power:80,acc:100,pp:15,contact:1,vsPP:1,desc:'Hace el doble de daño a los del PP.',quip:'«¡Derechita cobarde!»'},
-  menas:{name:'Culpar a los menas',type:'hem',cat:'P',power:110,acc:100,pp:10,bulo:.35,desc:'Golpe muy fuerte… pero el 35% de las veces es un BULO: falla y le rebota una cuarta parte del daño.',quip:'«¡La culpa es de los menas!»'},
-  chiringuitos:{name:'¡Cerrar chiringuitos!',type:'hem',cat:'P',power:65,acc:95,pp:15,contact:1,sec:{status:'frz',chance:.1},flinch:.1,desc:'10% de dejar de piedra y 10% de arrugar.',quip:'Promete cerrarlos todos… menos el suyo.'},
-  asaltar:{name:'Asaltar los cielos',type:'asa',cat:'S',power:130,acc:90,pp:5,selfBoost:{spa:-2},desc:'Muy potente, pero luego −2 Ataque Esp.',quip:'¡Al asalto de los cielos!'},
-  casta:{name:'La casta',type:'asa',cat:'S',power:75,acc:100,pp:10,drain:.5,desc:'Recupera la mitad del daño que causa.',quip:'Señala a la casta desde el chalet.'},
-  chalet:{name:'Chalet en Galapagar',type:'asa',cat:'X',pp:10,target:'self',eff:{kind:'sub'},desc:'Gasta 1/4 de PS: un chalet ocupa su sitio y recibe los golpes hasta derrumbarse.',quip:'Se atrinchera en el chalet.'},
-  purga:{name:'Purga en Vistalegre',type:'epi',cat:'P',power:120,acc:100,pp:10,purge:1,desc:'Golpe muy fuerte, pero un compañero de su banquillo pierde 1/5 de sus PS.',quip:'Ajusta cuentas con los suyos en Vistalegre.'},
-  escucha:{name:'Proceso de escucha',type:'asa',cat:'X',acc:90,pp:10,eff:{kind:'seed'},desc:'Le roba 1/8 de PS al rival cada turno.',quip:'Abre un proceso de escucha.'},
-  sonrisa:{name:'Sonrisa radiante',type:'asa',cat:'X',pp:5,target:'self',eff:{kind:'heal',frac:.5,charm:1},desc:'Recupera el 50% de los PS y baja el Ataque del rival: no hay quien le pegue a esa sonrisa.',quip:'Sonríe. Mucho.'},
-  jornada:{name:'Jornada de 37,5 horas',type:'asa',cat:'S',power:170,acc:100,pp:10,charge:'law',veto:.25,chargeMsg:'registra la ley. Se vota en el próximo turno…',desc:'Un turno para registrarla y al siguiente, golpe muy fuerte. 25% de que la tumbe el Congreso. Con terrazas, sale sin esperar.',quip:'¡Votación en el Congreso!'},
-  huelga:{name:'Huelga general',type:'epi',cat:'P',power:100,acc:100,pp:10,desc:'Ataque fuerte sin efectos extra.',quip:'Convoca huelga general.'},
-  maletero:{name:'Maletero',type:'fug',cat:'X',pp:10,prio:4,target:'self',eff:{kind:'protect'},desc:'Bloquea el ataque de este turno. Usado seguido suele fallar.',quip:'Se mete en un maletero.'},
-  referendum:{name:'Referéndum ilegal',type:'fug',cat:'P',power:25,acc:100,pp:15,multi:1,desc:'Llueven urnas: golpea de 2 a 5 veces.',quip:'Saca las urnas.'},
-  caganer:{name:'Caganer',type:'mit',cat:'X',pp:5,target:'field',eff:{kind:'caganer'},desc:'Deja un caganer en el lado rival: cada político que entre pierde 1/8 de PS al pisarlo.',quip:'Deja un caganer de regalo.'},
-  independencia:{name:'Independencia de 8 segundos',type:'mit',cat:'P',power:120,acc:100,pp:10,contact:1,suspend:1/4,desc:'Golpe enorme, pero a los 8 segundos se suspende: el rival recupera 1/4 del daño.',quip:'Declara la independencia…'},
+  publico:{name:'Llevar su propio público',type:'est',cat:'X',pp:5,target:'field',eff:{kind:'publico'},desc:'5 turnos (o hasta que se retire): le aplauden, sus ataques +30%, y al rival le abuchean (10% más de fallar).',quip:'Llegan los autobuses con su público.'},
+  derechita:{name:'Derechita cobarde',type:'tui',cat:'P',power:80,acc:100,pp:15,contact:1,vsPP:1,desc:'Hace el doble de daño a los del PP.',quip:'«¡Derechita cobarde!»'},
+  menas:{name:'Culpar a los menas',type:'mit',cat:'P',power:110,acc:100,pp:10,bulo:.35,desc:'Golpe muy fuerte… pero el 35% de las veces es un BULO: falla y le rebota una cuarta parte del daño.',quip:'«¡La culpa es de los menas!»'},
+  chiringuitos:{name:'¡Cerrar chiringuitos!',type:'mit',cat:'P',power:65,acc:95,pp:15,contact:1,sec:{status:'frz',chance:.1},flinch:.1,desc:'10% de dejar de piedra y 10% de arrugar.',quip:'Promete cerrarlos todos… menos el suyo.'},
+  asaltar:{name:'Asaltar los cielos',type:'cal',cat:'S',power:130,acc:90,pp:5,selfBoost:{spa:-2},desc:'Muy potente, pero luego −2 Ataque Esp.',quip:'¡Al asalto de los cielos!'},
+  casta:{name:'La casta',type:'mit',cat:'S',power:75,acc:100,pp:10,drain:.5,desc:'Recupera la mitad del daño que causa.',quip:'Señala a la casta desde el chalet.'},
+  chalet:{name:'Chalet en Galapagar',type:'est',cat:'X',pp:10,target:'self',eff:{kind:'sub'},desc:'Gasta 1/4 de PS: un chalet ocupa su sitio y recibe los golpes hasta derrumbarse.',quip:'Se atrinchera en el chalet.'},
+  purga:{name:'Purga en Vistalegre',type:'cal',cat:'P',power:120,acc:100,pp:10,purge:1,desc:'Golpe muy fuerte, pero un compañero de su banquillo pierde 1/5 de sus PS.',quip:'Ajusta cuentas con los suyos en Vistalegre.'},
+  escucha:{name:'Proceso de escucha',type:'est',cat:'X',acc:90,pp:10,eff:{kind:'seed'},desc:'Le roba 1/8 de PS al rival cada turno.',quip:'Abre un proceso de escucha.'},
+  sonrisa:{name:'Sonrisa radiante',type:'est',cat:'X',pp:5,target:'self',eff:{kind:'heal',frac:.5,charm:1},desc:'Recupera el 50% de los PS y baja el Ataque del rival: no hay quien le pegue a esa sonrisa.',quip:'Sonríe. Mucho.'},
+  jornada:{name:'Jornada de 37,5 horas',type:'cal',cat:'S',power:170,acc:100,pp:10,charge:'law',veto:.25,chargeMsg:'registra la ley. Se vota en el próximo turno…',desc:'Un turno para registrarla y al siguiente, golpe muy fuerte. 25% de que la tumbe el Congreso. Con terrazas, sale sin esperar.',quip:'¡Votación en el Congreso!'},
+  huelga:{name:'Huelga general',type:'cal',cat:'P',power:100,acc:100,pp:10,desc:'Ataque fuerte sin efectos extra.',quip:'Convoca huelga general.'},
+  maletero:{name:'Maletero',type:'est',cat:'X',pp:10,prio:4,target:'self',eff:{kind:'protect'},desc:'Bloquea el ataque de este turno. Usado seguido suele fallar.',quip:'Se mete en un maletero.'},
+  referendum:{name:'Referéndum ilegal',type:'cal',cat:'P',power:25,acc:100,pp:15,multi:1,desc:'Llueven urnas: golpea de 2 a 5 veces.',quip:'Saca las urnas.'},
+  caganer:{name:'Caganer',type:'est',cat:'X',pp:5,target:'field',eff:{kind:'caganer'},desc:'Deja un caganer en el lado rival: cada político que entre pierde 1/8 de PS al pisarlo.',quip:'Deja un caganer de regalo.'},
+  independencia:{name:'Independencia de 8 segundos',type:'esc',cat:'P',power:120,acc:100,pp:10,contact:1,suspend:1/4,desc:'Golpe enorme, pero a los 8 segundos se suspende: el rival recupera 1/4 del daño.',quip:'Declara la independencia…'},
   zasca:{name:'Zasca',type:'tui',cat:'P',power:85,acc:100,pp:10,contact:1,secTarget:{def:-1,chance:.2},desc:'20% de bajar la Defensa del rival.',quip:'¡Zasca!'},
   tuit3am:{name:'Tuit de las 3 a.m.',type:'tui',cat:'P',power:40,acc:100,pp:20,prio:1,contact:1,desc:'Siempre ataca primero.',quip:'Tuitea de madrugada.'},
-  impresora:{name:'Impresora en el Congreso',type:'tui',cat:'P',power:25,acc:100,pp:15,multi:1,desc:'Dispara de 2 a 5 folios.',quip:'Saca la impresora en el hemiciclo.'},
-  captura:{name:'Captura de pantalla',type:'hem',cat:'P',power:75,acc:100,pp:15,contact:1,sec:{status:'frz',chance:.1},desc:'10% de dejar de piedra.',quip:'Rescata un tuit de 2015.'},
-  alcalde:{name:'Es el alcalde…',type:'gal',cat:'X',acc:75,pp:10,eff:{kind:'confuse'},desc:'Lía al rival: puede pegarse a sí mismo. Si el liado eres tú, tus botones se desordenan.',quip:'«…el que quiere que sean los vecinos el alcalde.»'},
-  vecino:{name:'Cuanto peor, mejor',type:'gal',cat:'S',power:65,acc:100,pp:15,sec:{status:'par',chance:.1},desc:'10% de dejar en blanco.',quip:'«…para todos, y cuanto peor para todos, mejor.»'},
-  plasma:{name:'Comparecencia en plasma',type:'fug',cat:'S',power:75,acc:90,pp:15,flinch:.1,desc:'10% de que el rival se arrugue.',quip:'Comparece en una pantalla.'},
-  rescate:{name:'Rescate bancario',type:'gal',cat:'X',pp:1,target:'self',eff:{kind:'rescate'},desc:'Resucita a un compañero derrotado con 1/3 de los PS (una vez). Si no hay ninguno, se cura el 50%.',quip:'«No es un rescate, es una línea de crédito.»'},
-  desahucios:{name:'Stop Desahucios',type:'asa',cat:'P',power:120,acc:85,pp:10,contact:1,desc:'Pancarta gigante: golpe muy fuerte, pero puede fallar.',quip:'Despliega la pancarta de Stop Desahucios.'},
-  lucha:{name:'Lucha obrera',type:'res',cat:'P',power:95,acc:100,pp:15,contact:1,foul:1,desc:'Usa la fuerza del rival contra él: el daño se calcula con el Ataque del rival.',quip:'¡La fuerza del patrón, contra el patrón!'},
-  alquiler:{name:'Limitar alquileres',type:'asa',cat:'X',pp:10,target:'self',eff:{kind:'cap'},desc:'Durante 3 turnos, ningún golpe le quita más de 1/4 de su vida de una vez.',quip:'Pone un tope a lo que le pueden cobrar.'},
-  parlem:{name:'Parlem',type:'mit',cat:'X',acc:100,pp:10,eff:{kind:'parlem'},desc:'El rival se sienta a dialogar y pierde su siguiente turno. Seguido, puede fallar.',quip:'«Parlem.» Saca la bandera blanca.'},
-  cambio:{name:'Por el cambio',type:'mit',cat:'X',acc:100,pp:5,eff:{kind:'swaphp'},desc:'Intercambia su porcentaje de vida con el del rival.',quip:'«Por el cambio.»'},
-  otan:{name:'OTAN, de entrada no',type:'res',cat:'X',pp:10,prio:4,target:'self',eff:{kind:'otan'},desc:'Se pone en guardia: si le golpean este turno, devuelve el doble del daño. Seguido puede fallar.',quip:'«De entrada, no.»'},
-  isidoro:{name:'Isidoro',type:'fug',cat:'X',pp:5,target:'self',eff:{kind:'isidoro'},desc:'3 turnos en la clandestinidad: los ataques contra él fallan la mitad de las veces y los suyos son siempre críticos.',quip:'Gabardina, gafas de sol… y a la clandestinidad.'},
-  pana:{name:'Chaqueta de pana',type:'asa',cat:'P',power:100,acc:null,pp:1,legend:1,desc:'ATAQUE LEGENDARIO (1 vez). Vuelve el Felipe del 82: se cura entero, lanza una onda expansiva, pega un 50% más el resto del combate y cambia sus cuatro ataques.',quip:'¡Vuelve el Felipe del 82!'},
-  rosa:{name:'Puño y rosa',type:'asa',cat:'P',power:110,acc:100,pp:10,contact:1,desc:'Forma del 82: el puño y la rosa, golpe muy fuerte.',quip:'¡El puño y la rosa!'},
-  giratoria:{name:'Puerta giratoria',type:'res',cat:'P',power:80,acc:100,pp:10,contact:1,drain:.5,desc:'Le quita vida al rival y se queda la mitad: cobra dietas.',quip:'Entra por la puerta giratoria… y sale de consejero.'},
-  ave:{name:'AVE Madrid-Sevilla',type:'epi',cat:'P',power:95,acc:100,pp:5,splash:1,desc:'Forma del 82: un tren de alta velocidad arrolla al rival y a todo su banquillo (1/8 de PS a cada uno).',quip:'¡Viajeros al tren! Madrid-Sevilla, sin paradas.'},
+  impresora:{name:'Impresora en el Congreso',type:'mit',cat:'P',power:25,acc:100,pp:15,multi:1,desc:'Dispara de 2 a 5 folios.',quip:'Saca la impresora en el hemiciclo.'},
+  captura:{name:'Captura de pantalla',type:'tui',cat:'P',power:75,acc:100,pp:15,contact:1,sec:{status:'frz',chance:.1},desc:'10% de dejar de piedra.',quip:'Rescata un tuit de 2015.'},
+  alcalde:{name:'Es el alcalde…',type:'est',cat:'X',acc:75,pp:10,eff:{kind:'confuse'},desc:'Lía al rival: puede pegarse a sí mismo. Si el liado eres tú, tus botones se desordenan.',quip:'«…el que quiere que sean los vecinos el alcalde.»'},
+  vecino:{name:'Cuanto peor, mejor',type:'esc',cat:'S',power:65,acc:100,pp:15,sec:{status:'par',chance:.1},desc:'10% de dejar en blanco.',quip:'«…para todos, y cuanto peor para todos, mejor.»'},
+  plasma:{name:'Comparecencia en plasma',type:'esc',cat:'S',power:75,acc:90,pp:15,flinch:.1,desc:'10% de que el rival se arrugue.',quip:'Comparece en una pantalla.'},
+  rescate:{name:'Rescate bancario',type:'est',cat:'X',pp:1,target:'self',eff:{kind:'rescate'},desc:'Resucita a un compañero derrotado con 1/3 de los PS (una vez). Si no hay ninguno, se cura el 50%.',quip:'«No es un rescate, es una línea de crédito.»'},
+  desahucios:{name:'Stop Desahucios',type:'cal',cat:'P',power:120,acc:85,pp:10,contact:1,desc:'Pancarta gigante: golpe muy fuerte, pero puede fallar.',quip:'Despliega la pancarta de Stop Desahucios.'},
+  lucha:{name:'Lucha obrera',type:'cal',cat:'P',power:95,acc:100,pp:15,contact:1,foul:1,desc:'Usa la fuerza del rival contra él: el daño se calcula con el Ataque del rival.',quip:'¡La fuerza del patrón, contra el patrón!'},
+  alquiler:{name:'Limitar alquileres',type:'est',cat:'X',pp:10,target:'self',eff:{kind:'cap'},desc:'Durante 3 turnos, ningún golpe le quita más de 1/4 de su vida de una vez.',quip:'Pone un tope a lo que le pueden cobrar.'},
+  parlem:{name:'Parlem',type:'est',cat:'X',acc:100,pp:10,eff:{kind:'parlem'},desc:'El rival se sienta a dialogar y pierde su siguiente turno. Seguido, puede fallar.',quip:'«Parlem.» Saca la bandera blanca.'},
+  cambio:{name:'Por el cambio',type:'est',cat:'X',acc:100,pp:5,eff:{kind:'swaphp'},desc:'Intercambia su porcentaje de vida con el del rival.',quip:'«Por el cambio.»'},
+  otan:{name:'OTAN, de entrada no',type:'est',cat:'X',pp:10,prio:4,target:'self',eff:{kind:'otan'},desc:'Se pone en guardia: si le golpean este turno, devuelve el doble del daño. Seguido puede fallar.',quip:'«De entrada, no.»'},
+  isidoro:{name:'Isidoro',type:'est',cat:'X',pp:5,target:'self',eff:{kind:'isidoro'},desc:'3 turnos en la clandestinidad: los ataques contra él fallan la mitad de las veces y los suyos son siempre críticos.',quip:'Gabardina, gafas de sol… y a la clandestinidad.'},
+  pana:{name:'Chaqueta de pana',type:'mit',cat:'P',power:100,acc:null,pp:1,legend:1,desc:'ATAQUE LEGENDARIO (1 vez). Vuelve el Felipe del 82: se cura entero, lanza una onda expansiva, pega un 50% más el resto del combate y cambia sus cuatro ataques.',quip:'¡Vuelve el Felipe del 82!'},
+  rosa:{name:'Puño y rosa',type:'cal',cat:'P',power:110,acc:100,pp:10,contact:1,desc:'Forma del 82: el puño y la rosa, golpe muy fuerte.',quip:'¡El puño y la rosa!'},
+  giratoria:{name:'Puerta giratoria',type:'esc',cat:'P',power:80,acc:100,pp:10,contact:1,drain:.5,desc:'Le quita vida al rival y se queda la mitad: cobra dietas.',quip:'Entra por la puerta giratoria… y sale de consejero.'},
+  ave:{name:'AVE Madrid-Sevilla',type:'esc',cat:'P',power:95,acc:100,pp:5,splash:1,desc:'Forma del 82: un tren de alta velocidad arrolla al rival y a todo su banquillo (1/8 de PS a cada uno).',quip:'¡Viajeros al tren! Madrid-Sevilla, sin paradas.'},
   votos:{name:'Diez millones de votos',type:'mit',cat:'P',power:22,acc:100,pp:10,multi:2,desc:'Forma del 82: llueven papeletas, de 3 a 6 golpes.',quip:'¡Más de diez millones de votos!'},
-  hijo:{name:'¡Queremos un hijo tuyo!',type:'asa',cat:'S',power:85,acc:100,pp:10,secVol:{confuse:.3},desc:'Forma del 82: la multitud corea el cántico más famoso de 1982. 30% de liar al rival.',quip:'«¡Felipe, capullo, queremos un hijo tuyo!»'},
+  hijo:{name:'¡Queremos un hijo tuyo!',type:'mit',cat:'S',power:85,acc:100,pp:10,secVol:{confuse:.3},desc:'Forma del 82: la multitud corea el cántico más famoso de 1982. 30% de liar al rival.',quip:'«¡Felipe, capullo, queremos un hijo tuyo!»'},
   pataleta:{name:'Pataleta',type:null,cat:'P',power:50,acc:null,pp:1,contact:1,recoilMax:.25,desc:'',quip:'Se ha quedado sin argumentos y patalea.'}
 };
 const NOCOPY=new Set(['m360','pataleta','rescate','pana','cambio']);
 const POL=[
-  {id:'sanchez',name:'Perro Sanxe',short:'Perro Sanxe',types:['res','fug'],base:[98,87,105,53,85,67],ability:'robustez',moves:['peugeot','dondedije','tezanazo','falcon'],entry:'«Aquí sigo.»',ko:'«Me tomo cinco días para pensarlo.»'},
-  {id:'feijoo',name:'Núñez Fariñas',short:'Núñez Fariñas',types:['gal'],base:[90,75,85,115,90,55],ability:'estatica',moves:['nisino','derogar','lluvia','barco'],entry:'«Depende de cómo se mire.»',ko:'«Técnicamente, he ganado.»'},
-  {id:'ayuso',name:'Isabel Libertad',short:'Isabel Libertad',types:['cas'],base:[73,76,75,81,100,100],ability:'marllamas',moves:['comunismo','fruta','cana','bocata'],entry:'«¡Libertad!»',ko:'«Me voy de cañas. Libremente.»'},
-  {id:'almeida',name:'Carapolla',short:'Carapolla',types:['cas'],base:[86,68,72,109,66,106],ability:'competitivo',moves:['obras','m360','calderon','verbena'],entry:'«Partido a partido.»',ko:'«Partido a partido… y este lo hemos perdido.»'},
+  {id:'sanchez',name:'Perro Sanxe',short:'Perro Sanxe',types:['esc'],base:[98,87,105,53,85,67],ability:'robustez',moves:['peugeot','dondedije','tezanazo','falcon'],entry:'«Aquí sigo.»',ko:'«Me tomo cinco días para pensarlo.»'},
+  {id:'feijoo',name:'Núñez Fariñas',short:'Núñez Fariñas',types:['mit'],base:[90,75,85,115,90,55],ability:'estatica',moves:['nisino','derogar','lluvia','barco'],entry:'«Depende de cómo se mire.»',ko:'«Técnicamente, he ganado.»'},
+  {id:'ayuso',name:'Isabel Libertad',short:'Isabel Libertad',types:['tui'],base:[73,76,75,81,100,100],ability:'marllamas',moves:['comunismo','fruta','cana','bocata'],entry:'«¡Libertad!»',ko:'«Me voy de cañas. Libremente.»'},
+  {id:'almeida',name:'Carapolla',short:'Carapolla',types:['mit'],base:[86,68,72,109,66,106],ability:'competitivo',moves:['obras','m360','calderon','verbena'],entry:'«Partido a partido.»',ko:'«Partido a partido… y este lo hemos perdido.»'},
   {id:'abascal',name:'Santi Reconquista',short:'Santi Reconquista',types:['epi'],base:[100,125,100,55,85,35],ability:'aguante',moves:['caballo','publico','derechita','menas'],entry:'Llega al galope.',ko:'«No es una derrota: es una retirada estratégica a Covadonga.»'},
-  {id:'iglesias',name:'Pablo Ex-Coletas',short:'Pablo Ex-Coletas',types:['asa'],base:[70,85,65,105,85,120],ability:'espesura',moves:['asaltar','casta','chalet','purga'],entry:'Viene a asaltar los cielos.',ko:'«Me corto la coleta. Otra vez.»'},
-  {id:'yolanda',name:'Yoli Sonrisas',short:'Yoli Sonrisas',types:['asa'],base:[80,82,100,83,100,80],ability:'regeneracion',moves:['escucha','sonrisa','jornada','huelga'],entry:'Viene a escuchar.',ko:'«Doy un paso al lado.» Sonriendo, eso sí.'},
-  {id:'puigdemont',name:'Puchi Procés',short:'Puchi Procés',types:['fug'],base:[85,120,70,50,60,100],ability:'intimidacion',moves:['maletero','referendum','caganer','independencia'],entry:'Ha vuelto… de momento.',ko:'«Me voy… otra vez.»'},
+  {id:'iglesias',name:'Pablo Ex-Coletas',short:'Pablo Ex-Coletas',types:['cal'],base:[70,85,65,105,85,120],ability:'espesura',moves:['asaltar','casta','chalet','purga'],entry:'Viene a asaltar los cielos.',ko:'«Me corto la coleta. Otra vez.»'},
+  {id:'yolanda',name:'Yoli Sonrisas',short:'Yoli Sonrisas',types:['cal'],base:[80,82,100,83,100,80],ability:'regeneracion',moves:['escucha','sonrisa','jornada','huelga'],entry:'Viene a escuchar.',ko:'«Doy un paso al lado.» Sonriendo, eso sí.'},
+  {id:'puigdemont',name:'Puchi Procés',short:'Puchi Procés',types:['esc'],base:[85,120,70,50,60,100],ability:'intimidacion',moves:['maletero','referendum','caganer','independencia'],entry:'Ha vuelto… de momento.',ko:'«Me voy… otra vez.»'},
   {id:'rufian',name:'Rufi Impresoras',short:'Rufi Impresoras',types:['tui'],base:[85,105,100,79,83,78],ability:'torrente',moves:['zasca','tuit3am','impresora','captura'],entry:'Ya tiene el tuit preparado.',ko:'«Ahora sí: me voy en 18 meses.»'},
-  {id:'rajoy',name:'Mariano Viva el Vino',short:'Mariano Viva el Vino',types:['gal','fug'],base:[50,65,107,105,107,86],ability:'presion',moves:['alcalde','vecino','plasma','rescate'],entry:'Aparece en una pantalla de plasma.',ko:'«Me voy al restaurante. Que alguien deje un bolso en mi escaño.»'},
-  {id:'felipe',name:'Felipe GALzález',short:'Felipe GALzález',legend:1,types:['asa','epi'],base:[100,100,100,100,100,100],ability:'jarron',moves:['cambio','otan','giratoria','pana'],entry:'«Por el cambio.»',ko:'«Me vuelvo a mis bonsáis.»'},
-  {id:'colau',name:'Ada Okupau',short:'Ada Okupau',types:['asa','res'],base:[74,94,131,54,116,20],ability:'sindicalismo',moves:['desahucios','lucha','alquiler','parlem'],entry:'«Esta casa ahora es mía.»',ko:'«¡Esto es un desahucio!»'}
+  {id:'rajoy',name:'Mariano Viva el Vino',short:'Mariano Viva el Vino',types:['esc'],base:[50,65,107,105,107,86],ability:'presion',moves:['alcalde','vecino','plasma','rescate'],entry:'Aparece en una pantalla de plasma.',ko:'«Me voy al restaurante. Que alguien deje un bolso en mi escaño.»'},
+  {id:'felipe',name:'Felipe GALzález',short:'Felipe GALzález',legend:1,types:['mit'],base:[100,100,100,100,100,100],ability:'jarron',moves:['cambio','otan','giratoria','pana'],entry:'«Por el cambio.»',ko:'«Me vuelvo a mis bonsáis.»'},
+  {id:'colau',name:'Ada Okupau',short:'Ada Okupau',types:['cal'],base:[74,94,131,54,116,20],ability:'sindicalismo',moves:['desahucios','lucha','alquiler','parlem'],entry:'«Esta casa ahora es mía.»',ko:'«¡Esto es un desahucio!»'}
 ];
 const POLBY=Object.fromEntries(POL.map(p=>[p.id,p]));
 // Rivalidades: diálogo al encontrarse y +20% de daño en ambos sentidos
@@ -504,11 +496,11 @@ const isLocked=p=>p.legend&&!UNL[p.id];
 const $=s=>document.querySelector(s);
 const rnd=n=>Math.floor(Math.random()*n);
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
-function eff(atk,defTypes){if(!atk)return 1;return defTypes.reduce((m,d)=>m*((CHART[atk]||{})[d]??1),1);}
+function eff(atk,defTypes){if(!atk||atk==='est')return 1;const de=defTypes.includes('epi');if(atk==='epi')return de?1:1.5;if(de)return 1.5;return defTypes.reduce((m,d)=>m*((CHART[atk]||{})[d]??1),1);}
 function calcStats(b){const f=x=>Math.floor((2*x+31)*LV/100);return{hp:f(b[0])+LV+10,atk:f(b[1])+5,def:f(b[2])+5,spa:f(b[3])+5,spd:f(b[4])+5,spe:f(b[5])+5};}
 function c1(p){return TYPES[p.types[0]].c;}
 function chipHTML(t){return `<span class="chip" style="--tc:${TYPES[t].c}">${TYPES[t].e} ${TYPES[t].n}</span>`;}
-function effTxt(e){return e===0?'×0':e===.25?'×¼':e===.5?'×½':e===2?'×2':e===4?'×4':'';}
+function effTxt(e){return e>1?'💥 Súper eficaz':e<1&&e>0?'😴 Poco eficaz':e===0?'×0':'';}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const avs=p=>`<div class="avs" style="--c1:${c1(p)}66"><img src="${IMG(p.id)}" alt=""></div>`;
 
@@ -589,11 +581,11 @@ function openFicha(p,mon){
     <h4>Argumentos</h4><div class="mvl">${mv}</div>${p.legend?`<h4>Argumentos de la forma del 82</h4><div class="mvl">${F82.map(id=>{const m=MOVES[id];return `<div class="mvi" style="--tc:${TYPES[m.type].c}"><div class="a"><span>${esc(m.name)}</span><span>${TYPES[m.type].e} ${TYPES[m.type].n}</span></div><div class="b">${moveMeta(m,m.pp)}</div><div class="c">${esc(m.desc)} <i>${esc(m.quip)}</i></div></div>`;}).join('')}</div>`:''}`);
 }
 function openTypeChart(){
-  const rows=Object.keys(TYPES).map(a=>{
+  const rows=Object.keys(CHART).map(a=>{
     const gr={2:[],.5:[],0:[]};for(const[d,v]of Object.entries(CHART[a]))gr[v].push(TYPES[d].e+' '+TYPES[d].n);
     const parts=[];if(gr[2].length)parts.push('<b style="display:inline">×2</b> '+gr[2].join(', '));if(gr[.5].length)parts.push('<b style="display:inline">×½</b> '+gr[.5].join(', '));if(gr[0].length)parts.push('<b style="display:inline">×0</b> '+gr[0].join(', '));
-    return `<div class="r" style="--tc:${TYPES[a].c}"><b>${TYPES[a].e} ${TYPES[a].n} ataca a…</b>${parts.join(' · ')||'Todo a ×1'}</div>`;}).join('');
-  openSheet(`<h2>Tabla de tipos</h2><p style="font-size:13px;color:#6c6577;margin:6px 0 10px">Lo que no aparece hace daño normal (×1). Si el atacante es del mismo tipo que su argumento, +50%. Con lluvia, lo Tuit pega ×1,3 y lo Castizo ×0,5; con terrazas, al revés.</p><div class="tch">${rows}</div>`);
+    return `<div class="r" style="--tc:${TYPES[a].c}"><b>${TYPES[a].e} ${TYPES[a].n} ataca a…</b>${parts.join(' · ')||'Todo a ×1'}</div>`;}).join('')+`<div class="r" style="--tc:${TYPES.epi.c}"><b>🐎 Épico: todo exagerado</b>Pega ×1,5 a todos · recibe ×1,5 de todos (entre Épicos, ×1)</div>`;
+  openSheet(`<h2>Tabla de tipos</h2><p style="font-size:13px;color:#6c6577;margin:6px 0 10px">Lo que no aparece hace daño normal (×1). Si el atacante es del mismo tipo que su argumento, +50%. 🎪 Circo gana a 🧌 Troll (el show tapa cualquier tuit) · 🧌 Troll gana a 🌫️ Escaqueo (la captura te pilla aunque huyas) · 🌫️ Escaqueo gana a ✊ Calle (te convocan huelga y tú en el Falcon) · ✊ Calle gana a 🎪 Circo (la calle no se traga el show). 🐎 Épico va por libre: todo le sale exagerado. Con lluvia, lo Escaqueo pega más y lo Calle menos; con terrazas, lo Troll más y lo Escaqueo menos.</p><div class="tch">${rows}</div>`);
 }
 
 /* =================== ANIMACIONES =================== */
@@ -1025,8 +1017,8 @@ function calcDamage(u,t,mv,crit,rand){
   const phys=mv.cat==='P';
   const A=mv.foul?stat(t,'atk',crit?'atk':null):stat(u,phys?'atk':'spa',crit?'atk':null),D=stat(t,phys?'def':'spd',crit?'def':null);
   let d=Math.floor(Math.floor(Math.floor(2*LV/5+2)*power*A/D)/50)+2;
-  if(B&&B.field.w==='rain'){if(mv.type==='tui')d=Math.floor(d*1.3);else if(mv.type==='cas')d=Math.floor(d*.5);}
-  if(B&&B.field.w==='sun'){if(mv.type==='cas')d=Math.floor(d*1.3);else if(mv.type==='tui')d=Math.floor(d*.5);}
+  if(B&&B.field.w==='rain'){if(mv.type==='esc')d=Math.floor(d*1.3);else if(mv.type==='cal')d=Math.floor(d*.5);}
+  if(B&&B.field.w==='sun'){if(mv.type==='tui')d=Math.floor(d*1.3);else if(mv.type==='esc')d=Math.floor(d*.5);}
   if(crit)d=Math.floor(d*1.5);
   d=Math.floor(d*rand);
   if(mv.type&&u.types.includes(mv.type))d=Math.floor(d*1.5);
@@ -1041,7 +1033,7 @@ function calcDamage(u,t,mv,crit,rand){
 function accuracyOK(s,mv){
   const tt=active(1-s);if(tt&&tt.vol.isidoro>0&&Math.random()<.5)return false;
   if(!mv.acc)return true;
-  if(B.field.w==='rain'&&mv.type==='gal')return true;
+  if(B.field.w==='rain'&&mv.type==='esc')return true;
   let acc=mv.acc;if(B.sides[1-s].publico>0)acc-=10;
   return Math.random()*100<acc;
 }
@@ -1143,7 +1135,7 @@ async function boost(m,b,src,abil){
     if(v<0&&src&&src!==m&&m.p.ability==='competitivo'&&m.hp>0)await boost(m,{spa:2},null,'Abucheo de Vicálvaro');
   }
 }
-function immuneTo(t,st){return(st==='par'&&t.types.includes('gal'))||(st==='brn'&&t.types.includes('cas'))||(st==='frz'&&t.types.includes('hem'));}
+function immuneTo(t,st){return false;}
 async function inflict(t,st){
   if(t.status||immuneTo(t,st))return false;
   t.status=st;SND.sfx(st==='par'?'zap':st==='brn'?'fire':'ice');
@@ -1274,14 +1266,14 @@ async function attack(s,mv,id){
   await resistCheck();
   if(!hitSub)await stepAside(t);
   if(!hitSub&&t.hp>0){
-    if(mv.type==='cas'&&t.status==='frz'){t.status=null;await say(`${label(t)} reacciona por fin.`);}
+    if(mv.type==='cal'&&t.status==='frz'){t.status=null;await say(`${label(t)} reacciona por fin.`);}
     if(mv.sec&&Math.random()<mv.sec.chance)await inflict(t,mv.sec.status);
     if(mv.secVol&&Math.random()<mv.secVol.confuse)await confuse(t);
     if(mv.flinch&&!B.acted.has(1-s)&&Math.random()<mv.flinch)t.vol.flinch=true;
     if(mv.secTarget&&Math.random()<mv.secTarget.chance)await boost(t,{def:mv.secTarget.def},u);
     if(t.p.ability==='aguante')await boost(t,{def:1},null,'Aguante');
     if(mv.contact&&t.p.ability==='sindicalismo'&&u.hp>0&&!hitSub){const d=Math.max(1,Math.floor(u.max/8));hurt(u,d);SND.sfx('whistle');await fxRun(c=>burst('✊',c.a,{n:5,size:22,r:40}),s);flash(s);await say(`Sindicalismo: ${label(u)} se topa con un piquete.`,`Pierde ${d} PS.`);}
-    if(mv.contact&&t.p.ability==='estatica'&&!u.status&&!u.types.includes('gal')&&Math.random()<.3){u.status='par';await say(`Niebla gallega: ${label(u)} se queda en blanco.`);}
+    if(mv.contact&&t.p.ability==='estatica'&&!u.status&&Math.random()<.3){u.status='par';await say(`Niebla gallega: ${label(u)} se queda en blanco.`);}
   }
   if(t.vol.otan&&t.vol.otanHit>0&&t.hp>0&&u.hp>0){const r=Math.max(1,Math.floor(t.vol.otanHit*2*(t.pana?1.5:1)));t.vol.otan=false;SND.sfx('superE');await fxRun(c=>all(word('¡AHORA SÍ!',up(c.a,60),{color:'#e5533d',size:32}),beam(c.a,c.b,{color:'#ff4a3d',w:18,d:600}),shake(500,10)),t.side);hurt(u,r);flash(s);await say('¡AHORA SÍ!',`${label(t)} devuelve el doble: ${label(u)} pierde ${r} PS.`);}
   if(mv.suspend&&total>0&&t.hp>0&&!hitSub){await fxRun(fxSuspend,s);heal(t,Math.floor(total*mv.suspend));await say('¡Suspendida a los 8 segundos!',`${label(t)} recupera parte de los PS.`);}
@@ -1294,7 +1286,7 @@ async function attack(s,mv,id){
 }
 function bestResist(atkType,cur){
   let best=[],bv=9;
-  for(const k of Object.keys(TYPES)){if(k==='mit'||cur.length===1&&cur[0]===k)continue;const v=(CHART[atkType]||{})[k]??1;if(v<bv){bv=v;best=[k];}else if(v===bv)best.push(k);}
+  for(const k of Object.keys(TYPES)){if(k==='est'||k==='epi'||cur.length===1&&cur[0]===k)continue;const v=(CHART[atkType]||{})[k]??1;if(v<bv){bv=v;best=[k];}else if(v===bv)best.push(k);}
   return best[rnd(best.length)];
 }
 async function statusMove(s,mv,id){
@@ -1327,7 +1319,7 @@ async function statusMove(s,mv,id){
       if(B.field.w===mv.eff.w){await say('¡Pero ya está así!');return;}
       const prev=B.field.w;await playFX(id,s);B.field.w=mv.eff.w;B.field.turns=5;renderPlates();
       if(prev)await say(prev==='rain'?'Se acaba la lluvia…':'Se recogen las terrazas…');
-      await say(mv.eff.w==='rain'?'¡Empieza a llover sobre el plató!':'¡Se abren las terrazas!',mv.eff.w==='rain'?'Lo Gallego no falla, lo Tuit pega más y lo Castizo menos.':'Lo Castizo pega más y lo Tuit menos.');return;}
+      await say(mv.eff.w==='rain'?'¡Empieza a llover sobre el plató!':'¡Se abren las terrazas!',mv.eff.w==='rain'?'Lo Escaqueo pega más y lo Calle menos: nadie va a la mani con lluvia.':'Lo Troll pega más y lo Escaqueo menos.');return;}
     if(k==='obras'){if(B.sides[1-s].obras>0){await say('¡Pero esa calle ya está cortada!');return;}await playFX(id,s);B.sides[1-s].obras=3;renderPlates();await say(`¡Obras en el lado de ${label(t)}!`,'Durante 3 turnos no puede cambiar de político y pierde vida en el atasco.');return;}
     if(k==='caganer'){if(B.sides[1-s].caganer){await say('¡Ya hay un caganer ahí!');return;}await playFX(id,s);B.sides[1-s].caganer=true;renderPlates();await say(`¡Hay un caganer en el lado de ${t.side===0?'tu equipo':'el rival'}!`,'Cada político que entre perderá vida al pisarlo.');return;}
     if(k==='publico'){if(B.sides[s].publico>0){await say('¡Su público ya está aplaudiendo!');return;}await playFX(id,s);B.sides[s].publico=5;renderPlates();await say(`¡Llega el público de ${label(u)}!`,'Le aplaudirán todo y abuchearán al rival.');return;}
@@ -1350,7 +1342,7 @@ async function statusMove(s,mv,id){
   if(k==='swaphp'){const fu=u.hp/u.max,ft=t.hp/t.max;u.hp=Math.max(1,Math.round(ft*u.max));t.hp=Math.max(1,Math.round(fu*t.max));renderPlates();await say('¡Por el cambio! Se intercambian la vida.',`${label(u)} queda al ${Math.round(ft*100)}% y ${label(t)} al ${Math.round(fu*100)}%.`);return;}
   if(k==='parlem'){const ch=Math.pow(.5,u.vol.parlemCount||0);u.vol.parlemCount=(u.vol.parlemCount||0)+1;if(t.vol.parlem||Math.random()>=ch){await say('¡Pero el rival no quiere hablar! Ha fallado.');return;}t.vol.parlem=true;renderPlates();await say(`${label(t)} acepta sentarse a dialogar.`,'Perderá su próximo turno.');return;}
   if(k==='confuse'){if(!(await confuse(t)))await say(`${label(t)} ya está en pleno lío.`);return;}
-  if(k==='seed'){if(t.types.includes('asa')){await say(`No le afecta a ${label(t)}. Ya vive en asamblea.`);return;}if(t.vol.seed){await say('¡Pero ya le están escuchando!');return;}t.vol.seed=true;await say(`${label(t)} entra en un proceso de escucha sin fin.`);return;}
+  if(k==='seed'){if(t.types.includes('cal')){await say(`No le afecta a ${label(t)}. Ya vive en asamblea.`);return;}if(t.vol.seed){await say('¡Pero ya le están escuchando!');return;}t.vol.seed=true;await say(`${label(t)} entra en un proceso de escucha sin fin.`);return;}
 }
 async function endTurn(){
   for(const s of [0,1]){
@@ -1475,7 +1467,7 @@ function aiChoose(){
       else if(k==='par')sc=(foe.status||foe.vol.sub||immuneTo(foe,'par')||eff('gal',foe.types)===0)?0:30;
       else if(k==='brn')sc=(foe.status||foe.vol.sub||immuneTo(foe,'brn'))?0:(foe.st.atk>foe.st.spa?38:20);
       else if(k==='confuse')sc=(foe.vol.confuse||foe.vol.sub)?0:24;
-      else if(k==='seed')sc=(foe.vol.seed||foe.vol.sub||foe.types.includes('asa'))?0:28;
+      else if(k==='seed')sc=(foe.vol.seed||foe.vol.sub||foe.types.includes('cal'))?0:28;
       else if(k==='copycat'){const lm=B.lastMove;sc=(lm&&!NOCOPY.has(lm))?(MOVES[lm].cat==='X'?10:Math.min(estDmg(me,foe,lm),foe.hp)/foe.max*100):0;}
     }
     sc*=.8+Math.random()*.4;
