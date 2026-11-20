@@ -115,6 +115,11 @@ img{display:block;max-width:100%}
 .pip{width:9px;height:9px;border-radius:50%;background:#45b864;border:1px solid #0003}
 .pip.dead{background:#c8c0b0}
 #fx{position:absolute;inset:0;pointer-events:none;z-index:6}
+.cartel{background:#5cb82e;border:4px solid #fff;outline:3px solid #1c1a24;border-radius:6px;padding:6px 10px 5px;text-align:center;color:#fff;font-family:var(--display);width:178px;box-sizing:border-box;box-shadow:5px 5px 0 #0009}
+.cartel small{display:block;font-size:13px;letter-spacing:1px;text-shadow:1px 1px 0 #0006}
+.cartel b{display:block;height:30px;line-height:30px;background:#14121a;color:#7dff6a;border-radius:4px;margin:4px 0 3px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap;overflow:hidden;text-shadow:0 0 6px #7dff6a}
+.cartel b.err{color:#ff4d4d;text-shadow:0 0 6px #ff4d4d}
+.cartel i{font-size:11px;font-style:normal;letter-spacing:1px}
 .bub{position:absolute;z-index:5;max-width:66%;background:#fff;color:#1c1a24;border:3px solid #1c1a24;border-radius:16px;padding:6px 11px 8px;font-weight:800;font-size:16px;line-height:1.22;box-shadow:4px 4px 0 #0008;pointer-events:none;animation:bubIn .38s cubic-bezier(.2,1.6,.4,1) both}
 .bub small{display:block;font-family:var(--display);font-size:11px;letter-spacing:1px;color:var(--nc);-webkit-text-stroke:.3px #1c1a24;margin-bottom:2px;text-transform:uppercase}
 .bub::before,.bub::after{content:'';position:absolute;width:0;height:0;border-style:solid}
@@ -407,6 +412,7 @@ const MOVES={
   caballo:{name:'Carga a caballo',type:'epi',cat:'P',power:95,acc:100,pp:10,contact:1,desc:'Embestida al galope, muy potente.',quip:'Carga al galope.'},
   publico:{name:'Llevar su propio público',type:'epi',cat:'X',pp:5,target:'field',eff:{kind:'publico'},desc:'5 turnos (o hasta que se retire): le aplauden, sus ataques +30%, y al rival le abuchean (10% más de fallar).',quip:'Llegan los autobuses con su público.'},
   derechita:{name:'Derechita cobarde',type:'res',cat:'P',power:80,acc:100,pp:15,contact:1,vsPP:1,desc:'Hace el doble de daño a los del PP.',quip:'«¡Derechita cobarde!»'},
+  menas:{name:'Culpar a los menas',type:'hem',cat:'P',power:110,acc:100,pp:10,bulo:.35,desc:'Golpe muy fuerte… pero el 35% de las veces es un BULO: falla y le rebota una cuarta parte del daño.',quip:'«¡La culpa es de los menas!»'},
   chiringuitos:{name:'¡Cerrar chiringuitos!',type:'hem',cat:'P',power:65,acc:95,pp:15,contact:1,sec:{status:'frz',chance:.1},flinch:.1,desc:'10% de dejar de piedra y 10% de arrugar.',quip:'Promete cerrarlos todos… menos el suyo.'},
   asaltar:{name:'Asaltar los cielos',type:'asa',cat:'S',power:130,acc:90,pp:5,selfBoost:{spa:-2},desc:'Muy potente, pero luego −2 Ataque Esp.',quip:'¡Al asalto de los cielos!'},
   casta:{name:'La casta',type:'asa',cat:'S',power:75,acc:100,pp:10,drain:.5,desc:'Recupera la mitad del daño que causa.',quip:'Señala a la casta desde el chalet.'},
@@ -449,7 +455,7 @@ const POL=[
   {id:'feijoo',name:'Núñez Fariñas',short:'Núñez Fariñas',types:['gal'],base:[90,75,85,115,90,55],ability:'estatica',moves:['nisino','derogar','lluvia','barco'],entry:'«Depende de cómo se mire.»',ko:'«Técnicamente, he ganado.»'},
   {id:'ayuso',name:'Isabel Libertad',short:'Isabel Libertad',types:['cas'],base:[73,76,75,81,100,100],ability:'marllamas',moves:['comunismo','fruta','cana','bocata'],entry:'«¡Libertad!»',ko:'«Me voy de cañas. Libremente.»'},
   {id:'almeida',name:'Carapolla',short:'Carapolla',types:['cas'],base:[86,68,72,109,66,106],ability:'competitivo',moves:['obras','m360','calderon','verbena'],entry:'«Partido a partido.»',ko:'«Partido a partido… y este lo hemos perdido.»'},
-  {id:'abascal',name:'Santi Reconquista',short:'Santi Reconquista',types:['epi'],base:[100,125,100,55,85,35],ability:'aguante',moves:['caballo','publico','derechita','chiringuitos'],entry:'Llega al galope.',ko:'«No es una derrota: es una retirada estratégica a Covadonga.»'},
+  {id:'abascal',name:'Santi Reconquista',short:'Santi Reconquista',types:['epi'],base:[100,125,100,55,85,35],ability:'aguante',moves:['caballo','publico','derechita','menas'],entry:'Llega al galope.',ko:'«No es una derrota: es una retirada estratégica a Covadonga.»'},
   {id:'iglesias',name:'Pablo Ex-Coletas',short:'Pablo Ex-Coletas',types:['asa'],base:[70,85,65,105,85,120],ability:'espesura',moves:['asaltar','casta','chalet','purga'],entry:'Viene a asaltar los cielos.',ko:'«Me corto la coleta. Otra vez.»'},
   {id:'yolanda',name:'Yoli Sonrisas',short:'Yoli Sonrisas',types:['asa'],base:[80,82,100,83,100,80],ability:'regeneracion',moves:['escucha','sonrisa','jornada','huelga'],entry:'Viene a escuchar.',ko:'«Doy un paso al lado.» Sonriendo, eso sí.'},
   {id:'puigdemont',name:'Puchi Procés',short:'Puchi Procés',types:['fug'],base:[85,120,70,50,60,100],ability:'intimidacion',moves:['maletero','referendum','caganer','independencia'],entry:'Ha vuelto… de momento.',ko:'«Me voy… otra vez.»'},
@@ -713,6 +719,46 @@ async function legendIntro(s){
     await run(bk,[{opacity:.92},{opacity:0}],350,{ease:'linear'});
   },s);
   reveal();row.style.zIndex='';
+}
+async function fxMenas(c,bulo){
+  const W=$('#field').clientWidth,cx=x=>Math.min(W-98,Math.max(98,x));
+  const ang=Math.atan2(c.b.y-c.a.y,c.b.x-c.a.x)*180/Math.PI,mid=P(c.a.x+(c.b.x-c.a.x)*.45,c.a.y+(c.b.y-c.a.y)*.45);
+  SND.sfx('whoosh');lunge(c,{dist:26,d:320});
+  run(mk('👉',34),[{transform:T(c.a,.3,ang),opacity:1},{transform:T(mid,2.3,ang),opacity:1,offset:.3},{transform:T(mid,2.3,ang),opacity:1,offset:.8},{transform:T(mid,2.5,ang),opacity:0}],1100,{ease:'ease-out'});
+  await sleep(380);
+  const at=P(cx(c.b.x),c.b.y-14);
+  const el=mk('<div class="cartel"><small>UN MENA COBRA</small><b>0 €</b><i>AL MES</i></div>',16);const num=el.querySelector('b');
+  el.animate([{transform:T(P(at.x,at.y-200),1,-14),opacity:1},{transform:T(at,1.05,3),opacity:1,offset:.7},{transform:T(at,1,-2),opacity:1}],{duration:480*FXS(),easing:'ease-in',fill:'forwards'});
+  await sleep(330);SND.sfx('thud');shake(260,5);await sleep(200);
+  const fmt=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' €';
+  const setN=t=>{num.textContent=t;num.style.fontSize=Math.min(22,240/Math.max(6,t.length))+'px';};
+  const seq=[4700,38912,612450,7304118,93000000,4700000000000];
+  const steps=bulo?3:seq.length;
+  for(let i=0;i<steps;i++){
+    const len=String(seq[i]).length;
+    for(let k=0;k<5;k++){setN(fmt(Math.floor(10**(len-1)*(1+Math.random()*8.9))));SND.sfx('blipbeep');await sleep(45);}
+    setN(fmt(seq[i]));SND.sfx('coin');shake(200,2+i*1.6);
+    el.animate([{transform:T(at,1.12,-2)},{transform:T(at,1,-2)}],{duration:200*FXS(),fill:'forwards'});
+    await sleep(i===0?520:330);
+  }
+  if(!bulo){
+    for(let k=0;k<6;k++){setN(fmt(Math.floor(Math.random()*9e15)));SND.sfx('blipbeep');await sleep(40);}
+    setN('∞ €');SND.sfx('coins');SND.sfx('fanfare');flashScr('#7dff6a',360);shake(520,10);
+    el.animate([{transform:T(at,1,-2)},{transform:T(at,1.25,4),offset:.3},{transform:T(at,1.15,-3)}],{duration:420*FXS(),fill:'forwards'});
+    await all(rain(['💸','🪙','💶','💰'],c.b,{n:14,spread:170,size:26,h:200,stagger:45,d:800}),burst(['💸','🪙'],c.b,{n:8,r:85,size:24,d:800,delay:250}),word('¡JACKPOT!',P(at.x,at.y+58),{color:'#7dff6a',size:24,d:1100,delay:150}));
+    flash(1-c.s);
+    await el.animate([{opacity:1},{opacity:0}],{duration:250*FXS(),fill:'forwards'}).finished.catch(()=>{});
+  }else{
+    SND.sfx('static');num.classList.add('err');
+    for(let k=0;k<7;k++){setN(['#&%@!? €','9̷9̴9̵.̸?? €','NaN €','4.7?0.##0 €','¿¿¿ €','█▓▒░ €','ERROR'][k]);el.animate([{transform:T(P(at.x+(Math.random()-.5)*10,at.y),1,-2+(Math.random()-.5)*8)}],{duration:60,fill:'forwards'});await sleep(70);}
+    await sleep(180);
+    SND.sfx('thud');shake(420,9);
+    await run(mk('<span class="stamp" style="font-size:46px;padding:2px 16px;border-width:6px;background:#fffc">BULO</span>',46),[{transform:T(at,3.2,-16),opacity:0},{transform:T(at,1,-12),opacity:1,offset:.18},{transform:T(at,1.05,-12),opacity:1,offset:.3},{transform:T(at,1,-12),opacity:1,offset:.88},{transform:T(at,1,-12),opacity:0}],1100,{ease:'ease-in'});
+    SND.sfx('sad');
+    el.animate([{opacity:1},{opacity:0}],{duration:200*FXS(),fill:'forwards'});
+    await all(...[0,1,2,3,4,5].map(i=>fly(i%2?'📄':'💸',P(at.x+(i-2.5)*22,at.y),c.a,{d:520,size:24,arc:30+i*8,spin:i%2?260:-260,delay:i*60,ease:'ease-in'})),
+      (async()=>{await sleep(420);flash(c.s);await tint(c.s,'hue-rotate(-30deg) saturate(1.8) brightness(.9)',600);})());
+  }
 }
 async function resistCheck(){
   if(!B||!B.teams)return;
@@ -1187,6 +1233,10 @@ async function attack(s,mv,id){
     if(!heads){heal(t,Math.floor(t.max/4));await say('¡Cruz! Al final le da la razón al rival.',`${label(t)} recupera PS.`);return;}
     await say('¡Cara! Esta vez sí que sí.');
   }
+  if(mv.bulo){
+    const isB=Math.random()<mv.bulo;await fxRun(c=>fxMenas(c,isB),s);
+    if(isB){const d=Math.max(1,Math.floor(calcDamage(u,t,mv,false,.925)/4));hurt(u,d);flash(s);renderPlates();await say(`¡BULO! A ${label(u)} le rebota el cartel y pierde ${d} PS.`,'¡El chaval del cartel era una foto de banco de imágenes!');return;}
+  }
   if(mv.veto){
     const vetoed=Math.random()<mv.veto;await fxRun(c=>fxVote(c,vetoed),s);
     if(vetoed){await say('¡El Congreso la tumba!','Habrá que volver a registrarla.');return;}
@@ -1372,6 +1422,7 @@ function estDmg(u,t,id){
   if(mv.multi)d*=mv.multi===2?4.5:3.1;
   if(mv.coin)d=d*.5-(t.max/4)*.5;
   if(mv.veto)d*=1-mv.veto;
+  if(mv.bulo)d*=1-mv.bulo;
   if(mv.suspend)d*=1-mv.suspend;
   if(t.vol.sub>0&&!mv.sound)d=Math.min(d,t.vol.sub)*.7;
   return Math.max(0,d*(mv.acc?mv.acc/100:1));
