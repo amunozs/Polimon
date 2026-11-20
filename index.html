@@ -1539,7 +1539,7 @@ async function endTurn(){
 }
 async function faintCheck(){
   await resistCheck();
-  for(const s of [1,0]){const m=active(s);if(m.hp<=0&&!m.fainted){m.fainted=true;m.status=null;m.vol={};m.types=m.p.types.slice();if(m.p.id==='abascal')B.sides[s].publico=0;await koFly(s);if(s===0&&m.p.legend)SND.music('battle');await say(`¡${label(m)} se queda sin argumentos!`,null,{bub:{s,m,line:m.p.ko}});}}
+  for(const s of [1,0]){const m=active(s);if(m.hp<=0&&!m.fainted){m.fainted=true;m.status=null;m.vol={};m.types=m.p.types.slice();if(m.p.id==='abascal')B.sides[s].publico=0;if(s===0&&m.p.legend)SND.music('battle');await say(`¡${label(m)} se queda sin argumentos!`,null,{bub:{s,m,line:m.p.ko}});await koFly(s);}}
   if(B.teams[1].every(m=>m.hp<=0)){B.over=true;finish(true);return;}
   if(B.teams[0].every(m=>m.hp<=0)){B.over=true;finish(false);return;}
 }
