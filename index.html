@@ -1093,14 +1093,17 @@ async function retroMontage(){
   const st=$('#stage');if(!st)return;
   const box=document.createElement('div');box.className='retro';st.appendChild(box);
   clearBubbles();const hid=[$('#plate0'),$('#plate1'),$('#sp1').closest('.pod')].filter(Boolean);hid.forEach(e=>{e.style.transition='opacity .4s';e.style.opacity='.06';});box._hid=hid;
-  const W=st.clientWidth;let k=0;
+  let k=0,prev=null;
   for(const [id] of RETRO){
     const d=document.createElement('div');d.className='ph';d.innerHTML=`<img src="img/retro/${id}.webp" alt="">`;box.appendChild(d);
-    const rot=k%2?2:-2;k++;
-    SND.sfx('camera');
-    d.animate([{opacity:1,transform:`translateX(${W}px) rotate(${rot*3}deg)`},{opacity:1,transform:`translateX(0) rotate(${rot}deg) scale(1)`,offset:.22},{opacity:1,transform:`translateX(-8px) rotate(${rot}deg) scale(1.07)`,offset:.78},{opacity:1,transform:`translateX(${-W}px) rotate(${-rot*3}deg) scale(1.07)`}],{duration:1350*FXS(),easing:'ease-in-out',fill:'forwards'});
-    await sleep(1050);
+    const rot=k%2?1.5:-1.5;k++;
+    SND.sfx('camera');flashScr('#ffffff',260);
+    if(prev){const pv=prev;pv.style.opacity='0';setTimeout(()=>pv.remove(),50);}
+    d.style.opacity='1';
+    d.animate([{transform:`rotate(${rot}deg) scale(1.04)`,filter:'brightness(2.2)'},{transform:`rotate(${rot}deg) scale(1)`,filter:'brightness(1)',offset:.18},{transform:`rotate(${rot}deg) scale(1.06)`,filter:'brightness(1)'}],{duration:1050*FXS(),easing:'ease-out',fill:'forwards'});
+    prev=d;await sleep(1000);
   }
+  if(prev){SND.sfx('camera');flashScr('#ffffff',260);prev.style.opacity='0';}
   await sleep(250);
   const np=document.createElement('div');np.className='ph np';np.innerHTML='<img src="img/retro/portada.webp" alt="">';box.appendChild(np);
   await np.animate([{opacity:0,transform:'translateX(-50%) rotate(-540deg) scale(.1)'},{opacity:1,transform:'translateX(-50%) rotate(-3deg) scale(1.06)',offset:.8},{opacity:1,transform:'translateX(-50%) rotate(-3deg) scale(1)'}],{duration:750*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
