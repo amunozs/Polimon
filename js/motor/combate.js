@@ -78,8 +78,9 @@ async function runTurn(acts){
   const movers=[0,1].filter(s=>acts[s].type==='move');
   const pr={};movers.forEach(s=>pr[s]=actionPrio(s,acts[s]));
   movers.sort((a,b)=>{if(pr[a]!==pr[b])return pr[b]-pr[a];const sa=stat(active(a),'spe'),sb=stat(active(b),'spe');if(sa!==sb)return sb-sa;return Math.random()-.5;});
+  const start=[active(0),active(1)];
   for(const s of movers){
-    if(dead())return;const u=active(s);if(u.hp<=0)continue;
+    if(dead())return;const u=active(s);if(u.hp<=0||u!==start[s])continue;
     await useMove(s,acts[s]);B.acted.add(s);
     await faintCheck();if(dead())return;
   }
@@ -109,6 +110,7 @@ async function useMove(s,a){
 }
 async function execMove(s,id,forced){
   const u=active(s);let mv=MOVES[id];
+  if(mv.proces){const ph=u.proces||0;mv={...mv,power:[50,80,140][ph],name:`Procés · fase ${ph+1}: ${['Consulta','Declaración','¡Independencia!'][ph]}`};}
   let firstCharge=mv.charge&&!forced;
   if(firstCharge&&mv.charge==='law'&&B.field.w==='sun')firstCharge=false;
   await say(`${label(u)} usa ${mv.name}.`,firstCharge?null:(u.vol.drunk&&mv.quip?slur(mv.quip,true)+' ¡Hic!':mv.quip),u.p.id==='rufian'?{tweet:true}:null);
@@ -130,6 +132,7 @@ async function execMove(s,id,forced){
   if(forced)u.vol.charging=null;
   if(mv.charge==='law'&&!forced&&B.field.w==='sun')await say('Con las terrazas abiertas, se vota sin esperar.');
   if(mv.cat==='X')return statusMove(s,mv,id);
+  if(mv.proces){await attack(s,mv,id);if(B.over)return;u.proces=((u.proces||0)+1)%3;renderPlates();if(!u.proces&&u.hp>0)await say('…y vuelta a empezar.','🔁 El procés nunca se acaba.');return;}
   return attack(s,mv,id);
 }
 async function attack(s,mv,id){
@@ -157,7 +160,7 @@ async function attack(s,mv,id){
   }
   await playFX(id,s);
   const n=mv.multi===2?3+rnd(4):mv.multi?(r=>r<.35?2:r<.7?3:r<.85?4:5)(Math.random()):1;
-  let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false;
+  let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false,escaped=false;
   for(let i=0;i<n;i++){
     if(t.hp<=0)break;
     const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);
@@ -169,6 +172,7 @@ async function attack(s,mv,id){
     }else{
       if(t.vol.cap>0&&dmg>Math.floor(t.max/4)){dmg=Math.floor(t.max/4);capped=true;}
       if(t.p.ability==='jarron'&&!t.vased&&dmg>=t.hp){dmg=t.hp-1;vaseNow=true;}
+      if(t.p.ability==='maletero'&&!t.trunkUsed&&dmg>=t.hp&&t.hp>0){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){escaped=true;break;}await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`${t.name} se ha quedado sin maletero.`);}
       SND.hit(mv.cat==='P',eff(mv.type,t.types),crit);
       const d=Math.min(dmg,t.hp);hurt(t,d);total+=d;u.dealtTot=(u.dealtTot||0)+d;t.vol.lastHitType=mv.type;
       if(t.vol.otan)t.vol.otanHit=(t.vol.otanHit||0)+d;
@@ -178,6 +182,7 @@ async function attack(s,mv,id){
     if(crit)anyCrit=true;landed++;renderPlates();
     if(mv.multi)await pause(330);
   }
+  if(escaped){await trunkEscape(1-s);return;}
   if(!mv.multi)await pause(650);
   if(hitSub&&!mv.multi&&t.vol.sub>0)await say('¡El chalet recibe el golpe!');
   if(mv.multi)await say(id==='votos'?`¡${landed} lluvias de papeletas! ¡${(landed*1700000).toLocaleString('es-ES')} votos!`:`¡${landed} ${id==='impresora'?'folios':'urnas'} seguidos!`);

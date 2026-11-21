@@ -190,3 +190,30 @@ async function transformPana(s){
   SND.sfx('thud');
   await fxRun(async c=>{await all(ring(c.a,{color:'#ff4a3d',size:60,d:800}),ring(c.a,{color:'#ffffff',size:60,d:800,delay:150}),ring(c.a,{color:'#ff4a3d',size:60,d:800,delay:300}),shake(700,12));},s);
 }
+
+/* ---------- Maletero de Puchi ---------- */
+async function fxTrunk(c,escape){
+  const W=$('#field').clientWidth,dir=c.s===0?1:-1,y=c.a.y+18;
+  SND.sfx('engine');
+  const car=mk('<span style="display:inline-block;transform:scaleX('+(dir>0?-1:1)+')">🚗</span>',64);
+  const from=P(c.s===0?-60:W+60,y),at=P(c.a.x+dir*44,y);
+  await car.animate([{transform:T(from,1,0),opacity:1},{transform:T(at,1,0),opacity:1}],{duration:650*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
+  SND.sfx('door');
+  if(escape){
+    await all(sprA(c.s,[{transform:'none'},{transform:'translateY(-30px) scale(.8)',offset:.4},{transform:`translate(${dir*44}px,16px) scale(.15)`,opacity:0}],520),word('¡AL MALETERO!',up(c.a,70),{color:'#ffd36b',size:20,d:800}));
+    $('#sp'+c.s).style.opacity='0';
+    SND.sfx('engine');
+    await all(car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+80:-80,y),1,0)}],{duration:700*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}),rain('💨',P(at.x,y),{n:6,size:22,spread:80,h:6,stagger:50,d:600}),word('BRRRUM',P(W/2,y-40),{size:22,d:700,delay:150}));
+  }else{
+    await all(pop('🗳️',up(at,40),{size:34,d:900}),word('LLENO DE URNAS',up(at,80),{color:'#ff7a7a',size:16,d:1000}));
+    await car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+80:-80,y),1,0)}],{duration:600*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{});
+  }
+}
+async function trunkEscape(s){
+  const m=active(s);
+  await fxRun(c=>fxTrunk(c,true),s);
+  spriteOut(s);$('#sp'+s).style.opacity='';
+  await say(`¡${m.name} se escapa en un maletero!`,'🚗 El golpe da en el hueco vacío.');
+  const idx=s===0?await askSwitch(true):aiReplace();
+  await doSwitch(s,idx,true);
+}

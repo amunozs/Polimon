@@ -378,6 +378,18 @@ const MOVES = {
     quip: 'Saca las urnas.'
   },
 
+  proces: {
+    name: 'Procés',
+    type: 'fug',
+    cat: 'P',
+    power: 50,
+    acc: 100,
+    pp: 15,
+    proces: 1,
+    desc: 'Avanza por fases: Consulta (50), Declaración (80) e ¡Independencia! (140). Después… vuelta a empezar.',
+    quip: '«Esto va por fases.»'
+  },
+
   segadors: {
     name: 'Els Segadors',
     type: 'epi',

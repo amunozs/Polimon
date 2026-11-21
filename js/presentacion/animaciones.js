@@ -173,6 +173,25 @@ const FX={
   },
   maletero:async c=>{await all(pop('🚘',c.a,{size:76,d:1000}),sprA(c.s,[{opacity:1},{opacity:0,offset:.2},{opacity:0,offset:.8},{opacity:1}],1000),ring(c.a,{color:'#ad9ff3',delay:200}));},
   referendum:async c=>{const f=$('#field');REFC&&REFC.remove();REFC=document.createElement('div');REFC.className='refbox';REFC.innerHTML='🗳️ SÍ: <b>0%</b>';f.appendChild(REFC);REFC.style.left=Math.max(6,Math.min(f.clientWidth-130,c.b.x-140))+'px';REFC.style.top=Math.max(6,c.b.y-30)+'px';await all(pop('🥡',up(c.b,56),{size:44,d:800}),word('URNA DE TÁPER',up(c.b,96),{size:16,d:900}));},
+  proces:async c=>{
+    const ph=active(c.s).proces||0,W=$('#field').clientWidth,H=$('#field').clientHeight;
+    if(ph===0){
+      SND.sfx('blipbeep');await all(pop('🗳️',up(c.a,62),{size:40,d:800}),word('FASE 1: CONSULTA',P(W/2,H*.2),{color:'#ffd36b',size:18,d:1000}));
+      await fly('📄',up(c.a,40),c.b,{d:420,size:26,arc:40,spin:180});SND.sfx('slap');await burst('📄',c.b,{n:4,size:18,r:40});
+    }else if(ph===1){
+      SND.sfx('printer');await all(pop('📜',up(c.a,62),{size:44,d:900}),word('FASE 2: DECLARACIÓN',P(W/2,H*.2),{color:'#ffd36b',size:18,d:1100}));
+      await fly('📜',up(c.a,40),c.b,{d:420,size:34,spin:360,ease:'ease-in'});SND.sfx('thud');shake(350,7);await burst(['📜','✍️'],c.b,{n:6,size:22,r:55});
+    }else{
+      const fl=document.createElement('div');fl.className='fxi';
+      fl.style.cssText=`left:0;top:0;width:${W}px;height:${H}px;opacity:0;background:repeating-linear-gradient(180deg,#fcdd09 0 11.11%,#da121a 11.11% 22.22%)`;
+      fl.innerHTML=`<svg width="${W*.42}" height="${H}" viewBox="0 0 42 100" preserveAspectRatio="none" style="position:absolute;left:0;top:0"><polygon points="0,0 42,50 0,100" fill="#0f47af"/></svg><span style="position:absolute;left:${W*.07}px;top:${H/2-22}px;font-size:40px;color:#fff">★</span>`;
+      $('#fx').appendChild(fl);SND.sfx('fanfare');
+      fl.animate([{opacity:0,transform:'skewY(0)'},{opacity:.38,transform:'skewY(-3deg)',offset:.25},{opacity:.34,transform:'skewY(3deg)',offset:.7},{opacity:0,transform:'skewY(0)'}],{duration:2400*FXS(),fill:'forwards'});
+      await all(word('¡INDEPENDENCIA!',P(W/2,H*.22),{color:'#fcdd09',size:30,d:1500,rot:-4}),rain(['🎆','🎇','✨'],P(W/2,H*.3),{n:12,size:26,spread:W*.8,h:120,stagger:50,d:900}),(async()=>{await sleep(300);SND.sfx('fireworks');})());
+      await lunge(c,{dist:70});SND.sfx('crit');shake(600,13);flashScr('#fcdd09',300);
+      await burst(['💥','🎆'],c.b,{n:10,size:28,r:80});
+    }
+  },
   segadors:async c=>{
     const W=$('#field').clientWidth,H=$('#field').clientHeight;
     const flag=document.createElement('div');flag.className='fxi';flag.style.cssText=`left:0;top:0;width:${W}px;height:${H}px;background:repeating-linear-gradient(180deg,#fcdd09 0 11.11%,#da121a 11.11% 22.22%);opacity:0`;$('#fx').appendChild(flag);
