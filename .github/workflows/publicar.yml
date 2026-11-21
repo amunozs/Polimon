@@ -1,0 +1,52 @@
+# Publica las dos versiones del juego en GitHub Pages:
+#   - rama main → https://amunozs.github.io/Polimon/      (producción)
+#   - rama pre  → https://amunozs.github.io/Polimon/pre/  (preproducción)
+# Requisito (una sola vez): Settings → Pages → Source → "GitHub Actions".
+name: Publicar web
+
+on:
+  push:
+    branches: [main, pre]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar producción (main)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: prod
+      - name: Descargar preproducción (pre)
+        uses: actions/checkout@v4
+        with:
+          ref: pre
+          path: pre
+      - name: Montar la web
+        run: |
+          mkdir -p _site/pre
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'pruebas' prod/ _site/
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'pruebas' pre/ _site/pre/
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
