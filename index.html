@@ -135,6 +135,18 @@ img{display:block;max-width:100%}
 .pip{width:9px;height:9px;border-radius:50%;background:#45b864;border:1px solid #0003}
 .pip.dead{background:#c8c0b0}
 #fx{position:absolute;inset:0;pointer-events:none;z-index:6}
+.field.drunkf{animation:drunkSway 3.4s ease-in-out infinite}
+@keyframes drunkSway{0%,100%{transform:rotate(0) translateX(0);filter:blur(0)}25%{transform:rotate(-1.6deg) translateX(-6px);filter:blur(.7px) saturate(1.3)}50%{transform:rotate(.4deg) translateX(2px);filter:blur(.2px)}75%{transform:rotate(1.6deg) translateX(6px);filter:blur(.8px) saturate(1.3)}}
+.sprite.drunk img{filter:saturate(1.35) sepia(.18) hue-rotate(-12deg)}
+.sprite .ghost{position:absolute;inset:0;opacity:.42;pointer-events:none;animation:ghostV 1.5s ease-in-out infinite alternate}
+@keyframes ghostV{from{translate:-12px 2px}to{translate:12px -2px}}
+.sprite .bubs{position:absolute;left:58%;top:6%;font-size:18px;animation:bubsUp 2.2s ease-in infinite;pointer-events:none}
+.sprite .bubs.b2{left:30%;font-size:14px;animation-delay:1.1s}
+@keyframes bubsUp{0%{transform:translateY(10px) scale(.6);opacity:0}20%{opacity:1}100%{transform:translateY(-46px) scale(1.1);opacity:0}}
+.controls.drunkc .move{animation:drunkBtn 1.8s ease-in-out infinite alternate}
+.controls.drunkc .move:nth-child(2n){animation-delay:-.9s}
+@keyframes drunkBtn{from{transform:rotate(-2.5deg) translateY(1px)}to{transform:rotate(2.5deg) translateY(-2px)}}
+.dzhint.drunkh{background:#f08457;color:#1c1a24}
 .chyron{position:absolute;left:0;right:0;bottom:8px;z-index:8;display:flex;align-items:stretch;font-family:var(--display);box-shadow:0 3px 0 #0007;animation:chyIn .35s cubic-bezier(.2,1.3,.4,1) both;pointer-events:none}
 .chyron b{background:#e5333d;color:#fff;padding:5px 8px;font-size:12px;letter-spacing:1px;white-space:nowrap;display:flex;align-items:center}
 .chyron span{flex:1;background:#fff;color:#14121a;padding:5px 8px;font-size:12.5px;line-height:1.2;font-weight:700}
@@ -930,6 +942,72 @@ async function fxMenas(c,bulo){
       (async()=>{await sleep(420);flash(c.s);await tint(c.s,'hue-rotate(-30deg) saturate(1.8) brightness(.9)',600);})());
   }
 }
+const LEFTY=['huelga','asaltar','desahucios','casta','lucha'];
+function slur(t,rand){const V='aeiouáéíóú';let a=t.split('');let last=-1;for(let i=a.length-1;i>=0;i--)if(V.includes(a[i].toLowerCase())){last=i;break;}
+  if(last>=0)a[last]=a[last]+a[last]+a[last];
+  if(rand){const idx=a.map((ch,i)=>V.includes(ch.toLowerCase())&&i!==last?i:-1).filter(i=>i>=0);if(idx.length){const k=idx[rnd(idx.length)];a[k]=a[k]+a[k];}}
+  return a.join('');}
+function dispName(m){return m.vol&&m.vol.drunk?slur(m.name):m.name;}
+function drunkVisuals(){
+  if(!B||!B.teams)return;let any=false;
+  for(const s of [0,1]){const m=active(s),el=$('#sp'+s);if(!el)continue;const dr=!!(m&&m.vol&&m.vol.drunk&&m.hp>0);any=any||dr;
+    el.classList.toggle('drunk',dr);
+    if(dr&&!el.querySelector('.ghost')){const im=el.querySelector('img');if(im){const g=im.cloneNode();g.className='ghost';g.alt='';el.appendChild(g);}const b1=document.createElement('span');b1.className='bubs';b1.textContent='🫧';const b2=document.createElement('span');b2.className='bubs b2';b2.textContent='🫧';el.append(b1,b2);}
+    if(!dr)el.querySelectorAll('.ghost,.bubs').forEach(e=>e.remove());}
+  $('#field').classList.toggle('drunkf',any&&!RM&&SPEED!==0);
+}
+async function hiccup(s){SND.sfx('hic');await fxRun(c=>all(word('¡HIC!',up(c.a,70),{color:'#ffd36b',size:20,d:650,rot:-8}),sprA(c.s,[{transform:'none'},{transform:'translateY(-14px) rotate(-6deg)',offset:.3},{transform:'none'}],400)),s);}
+async function addCana(m,s){
+  if(m.hp<=0||m.vol.drunk||m.status==='slp')return;
+  m.vol.canas=(m.vol.canas||0)+1;SND.sfx('glug');
+  await fxRun(c=>all(pop('🍺',up(c.a,64),{size:34,d:700}),word(`${m.vol.canas}ª CAÑA`,up(c.a,100),{color:'#ffd36b',size:16,d:800})),s);
+  renderPlates();
+  if(m.vol.canas>=3){delete m.vol.canas;await getDrunk(m,s);}
+  else await say(`${label(m)} se toma otra caña.`,`🍺 Lleva ${m.vol.canas}. A la tercera, se viene arriba.`);
+}
+async function getDrunk(m,s){
+  m.vol.drunk=3;delete m.vol.confuse;delete m.vol.canas;
+  SND.sfx('organillo');setTimeout(()=>{SND.sfx('applause');},500);
+  await fxRun(async c=>{
+    flashScr('#ffd36b',300);shake(500,6);
+    await all(rain(['🍺','🍻','🍺','🎉'],c.a,{n:14,size:28,spread:200,h:220,stagger:50,d:900}),
+      word('¡SALUD!',up(c.a,80),{color:'#ffd36b',size:30,d:1200,rot:-6}),
+      sprA(c.s,[{transform:'none'},{transform:'rotate(-12deg) translateX(-8px)'},{transform:'rotate(10deg) translateX(8px)'},{transform:'rotate(-8deg)'},{transform:'none'}],1100));
+  },s);
+  renderPlates();
+  await say(`¡${m.name} se ha venido arriba con las cañas!`,'🍺 Está borracha: a saber qué hace ahora.');
+}
+async function drunkAct(s,a){
+  const u=active(s),t=active(1-s);
+  await hiccup(s);
+  const r=Math.random();
+  if(r<.4)return false;
+  if(a&&!a.forced&&!a.struggle&&a.idx!=null){}
+  if(r<.7){
+    const id=LEFTY[rnd(LEFTY.length)];
+    await say(`¡${label(u)} se lía con las cañas y se le escapa algo de izquierdas!`,null,{tilt:true});
+    await execMove(s,id,false);
+    if(u.hp>0&&!B.over)await say(`💬 ${label(u)}`,null,{bub:{s,m:u,line:'¿He dicho yo eso? ¡Hic!'}});
+    return true;
+  }
+  if(r<.8){
+    await fxRun(c=>all(...[0,1,2].map(i=>fly('🍺',c.a,c.b,{d:600,size:26,arc:(i-1)*30,delay:i*120}))),s);
+    await say(`💬 ${label(u)}`,null,{bub:{s,m:u,line:'¡Esta ronda la pago yo! ¡Hic!'}});
+    if(t.hp>0&&!isAway(t)&&t.hp<t.max){heal(t,Math.floor(t.max*.15));SND.sfx('heal');renderPlates();await say(`${label(t)} se toma la caña a su salud y recupera vida.`);}
+    else await say(`${label(t)} no quiere la caña, pero gracias.`);
+    return true;
+  }
+  if(r<.9){
+    SND.sfx('organillo');
+    await fxRun(c=>all(orbit('🎵',up(c.a,50),{r:34,d:1300,turns:2}),orbit('🎶',up(c.a,50),{r:34,d:1300,turns:2,phase:Math.PI}),sprA(c.s,[{transform:'none'},{transform:'rotate(-10deg) translateX(-10px)'},{transform:'rotate(10deg) translateX(10px)'},{transform:'rotate(-10deg) translateX(-10px)'},{transform:'none'}],1300)),s);
+    await say(`${label(u)} se arranca a cantar un chotis a pleno pulmón…`,'…y se olvida del debate. Pierde el turno.');
+    return true;
+  }
+  await fxRun(c=>all(pop('🪑',P(c.a.x+30,c.a.y+20),{size:40,d:900}),sprA(c.s,[{transform:'none'},{transform:'rotate(75deg) translateY(20px)',offset:.35},{transform:'rotate(75deg) translateY(20px)',offset:.7},{transform:'none'}],1000),(async()=>{await sleep(330);SND.sfx('thud');shake(300,8);})()),s);
+  hurt(u,Math.max(1,Math.floor(u.max/8)));flash(s);renderPlates();
+  await say(`¡${label(u)} se cae de la silla de la terraza!`,'Se hace daño a sí misma.');
+  return true;
+}
 async function resistCheck(){
   if(!B||!B.teams)return;
   for(const s of [0,1])for(const m of B.teams[s]){
@@ -1098,6 +1176,9 @@ const SND=(()=>{
     flip:()=>{for(let i=0;i<9;i++)tone({f:i%2?900:1200,d:.04,v:.15,t:i*.13});},
     ding:()=>{tone({f:2637,d:.8,type:'sine',v:.3});tone({f:3951,d:.6,type:'sine',v:.15,t:.05});},
     brrt:()=>{noise({d:.35,v:.5,f:2200,q:2});for(let i=0;i<8;i++)tone({f:180,d:.03,type:'square',v:.15,t:i*.04});},
+    hic:()=>{tone({f:520,f2:980,d:.11,type:'triangle',v:.4});noise({d:.05,v:.25,f:1500,q:3});},
+    organillo:()=>arp(['G5','E5','G5','C6','B5','A5','G5','E5','F5','D5'],{d:.13,type:'square',v:.16,gap:.12}),
+    glug:()=>{for(let i=0;i<4;i++)tone({f:300-i*30,f2:180,d:.08,type:'sine',v:.4,t:i*.11});},
     fanfare:()=>arp(['C5','E5','G5','C6','G5','C6'],{d:.14,v:.35,gap:.11}),
     sad:()=>{tone({f:392,f2:370,d:.3,type:'sawtooth',v:.25});tone({f:370,f2:349,d:.3,type:'sawtooth',v:.25,t:.32});tone({f:349,f2:262,d:.8,type:'sawtooth',v:.25,t:.64,vib:6});},
     cluck:()=>{for(let i=0;i<3;i++)tone({f:700,f2:500,d:.07,v:.3,t:i*.11});},
@@ -1204,6 +1285,7 @@ function calcDamage(u,t,mv,crit,rand){
   let power=mv.power;
   if(mv.eruption)power=Math.max(1,Math.floor(mv.power*u.hp/u.max));
   const pin=PINCH[u.p.ability];if(pin&&pin===mv.type&&u.hp<=u.max/3)power*=1.5;
+  if(u.vol&&u.vol.drunk)power*=1.3;
   const phys=mv.cat==='P';
   const A=mv.foul?stat(t,'atk',crit?'atk':null):stat(u,phys?'atk':'spa',crit?'atk':null),D=stat(t,phys?'def':'spd',crit?'def':null);
   let d=Math.floor(Math.floor(Math.floor(2*LV/5+2)*power*A/D)/50)+2;
@@ -1263,7 +1345,7 @@ async function say(text,sub,opt){
   if(ABORT)throw ABORTERR;
   renderPlates();
   let bb=null;
-  if(opt&&opt.bub){if(!opt.bub.keep)clearBubbles();bb=bubble(opt.bub.s,opt.bub.m,opt.bub.line);if(!bb&&opt.bub.line)sub=opt.bub.line;}
+  if(opt&&opt.bub){if(!opt.bub.keep)clearBubbles();if(opt.bub.m&&opt.bub.m.vol&&opt.bub.m.vol.drunk&&opt.bub.line&&!/Hic/.test(opt.bub.line))opt.bub.line=slur(opt.bub.line,true)+' ¡Hic!';bb=bubble(opt.bub.s,opt.bub.m,opt.bub.line);if(!bb&&opt.bub.line)sub=opt.bub.line;}
   const msg=$('#msg');msg.classList.toggle('tweet',!!(opt&&opt.tweet));
   if(opt&&opt.tweet)$('#msgAv').src=IMG('rufian');
   msg.classList.toggle('tilt',!!(opt&&opt.tilt));
@@ -1285,8 +1367,8 @@ function hpCls(m){const f=m.hp/m.max;return f>.5?'':f>.2?' mid':' low';}
 function plateHTML(s){
   const m=active(s);const st=m.status?STLBL[m.status]:null;
   const pips=B.teams[s].map(x=>`<span class="pip${x.hp<=0?' dead':''}"></span>`).join('');
-  const extra=(m.vol.confuse?'<span class="st" style="background:#8a5bd1">LIADO</span>':'')+(isAway(m)?'<span class="st" style="background:#4a6fd1">DE GIRA</span>':'')+(m.vol.charging?'<span class="st" style="background:#2f8f49">EN TRÁMITE</span>':'')+(m.vol.cap>0?`<span class="st" style="background:#7dbb62;color:#1c1a24">TOPE ${m.vol.cap}</span>`:'')+(m.vol.parlem?'<span class="st" style="background:#fff;color:#1c1a24">🏳️ PARLEM</span>':'')+(m.vol.isidoro>0?`<span class="st" style="background:#333">🕶️ ISIDORO ${m.vol.isidoro}</span>`:'')+(m.vol.vase>0?'<span class="st" style="background:#3e7fb3">🏺 JARRÓN</span>':'')+(m.vol.otan?'<span class="st" style="background:#e5533d">EN GUARDIA</span>':'');
-  return `<div class="top"><span class="nm">${m.p.legend?`<span class="lgt">${m.pana?'FORMA 82':'LEGENDARIO'}</span>`:''}${esc(m.name)}</span><span class="lv">Nv${LV}</span></div>
+  const extra=(m.vol.drunk?'<span class="st" style="background:#f0a530;color:#1c1a24">🍺 BORRACHA</span>':'')+(m.vol.canas?`<span class="st" style="background:#5a3d12">${'🍺'.repeat(m.vol.canas)}</span>`:'')+(m.vol.confuse?'<span class="st" style="background:#8a5bd1">LIADO</span>':'')+(isAway(m)?'<span class="st" style="background:#4a6fd1">DE GIRA</span>':'')+(m.vol.charging?'<span class="st" style="background:#2f8f49">EN TRÁMITE</span>':'')+(m.vol.cap>0?`<span class="st" style="background:#7dbb62;color:#1c1a24">TOPE ${m.vol.cap}</span>`:'')+(m.vol.parlem?'<span class="st" style="background:#fff;color:#1c1a24">🏳️ PARLEM</span>':'')+(m.vol.isidoro>0?`<span class="st" style="background:#333">🕶️ ISIDORO ${m.vol.isidoro}</span>`:'')+(m.vol.vase>0?'<span class="st" style="background:#3e7fb3">🏺 JARRÓN</span>':'')+(m.vol.otan?'<span class="st" style="background:#e5533d">EN GUARDIA</span>':'');
+  return `<div class="top"><span class="nm">${m.p.legend?`<span class="lgt">${m.pana?'FORMA 82':'LEGENDARIO'}</span>`:''}${esc(dispName(m))}</span><span class="lv">Nv${LV}</span></div>
   <div class="mid"><span class="chips">${m.types.map(t=>`<span class="chip" style="--tc:${TYPES[t].c}">${TYPES[t].e}</span>`).join('')}${st?`<span class="st" style="background:${st[1]}">${st[0]}</span>`:''}${extra}</span><span class="pips">${pips}</span></div>
   <div class="hp${hpCls(m)}"><i style="width:${(m.hp/m.max*100).toFixed(1)}%"></i></div>
   ${s===0?`<div class="hpnum">${m.hp}/${m.max}</div>`:`<div class="hpnum">${Math.ceil(m.hp/m.max*100)}%</div>`}`;
@@ -1310,7 +1392,7 @@ function renderField(){
   const dz=!!(active(0).vol.confuse&&active(0).hp>0);
   $('#field').classList.toggle('dizzy',dz&&!RM);
 }
-function renderPlates(){if(!B)return;for(const s of [0,1]){const m=active(s),pl=$('#plate'+s);pl.innerHTML=plateHTML(s);pl.classList.toggle('legend',!!m.p.legend);pl.classList.toggle('f82',!!m.pana);}renderField();}
+function renderPlates(){if(!B)return;for(const s of [0,1]){const m=active(s),pl=$('#plate'+s);pl.innerHTML=plateHTML(s);pl.classList.toggle('legend',!!m.p.legend);pl.classList.toggle('f82',!!m.pana);}renderField();drunkVisuals();}
 function setSprite(s){const m=active(s),el=$('#sp'+s);try{el.closest('.pod').style.setProperty('--pc',c1(m.p));}catch(_){}el.innerHTML=`<img src="${monImg(m)}" alt="${esc(m.p.name)}"><span class="chalet">🏡</span><span class="vase">🏺</span><span class="shades">🕶️</span>`;el.className='sprite';void el.offsetWidth;el.className=m.p.legend?'sprite prelegend':'sprite in';}
 function flash(s){const el=$('#sp'+s);el.classList.remove('hit','in');void el.offsetWidth;el.classList.add('hit');}
 function spriteOut(s){const el=$('#sp'+s);el.classList.remove('gone','subbed','vased','clan','legend','f82');el.classList.add('out');}
@@ -1334,7 +1416,7 @@ async function inflict(t,st){
   if(st==='frz')await say(`${label(t)} se queda de piedra.`);
   return true;
 }
-async function confuse(t){if(t.vol.confuse)return false;SND.sfx('wobble');t.vol.confuse=2+rnd(4);if(t===active(t.side))fxRun(c=>all(orbit('⭐',up(c.a,46),{r:30,d:1300,turns:2}),orbit('⭐',up(c.a,46),{r:30,d:1300,turns:2,phase:Math.PI*2/3}),orbit('⭐',up(c.a,46),{r:30,d:1300,turns:2,phase:Math.PI*4/3})),t.side);await say(`${label(t)} se hace un lío.`,t.side===0?'Cuidado: tus botones ya no dicen la verdad.':null);return true;}
+async function confuse(t){if(t.vol.confuse)return false;if(t.vol.drunk){await say(`A ${label(t)} le da todo igual: ya va mareada de serie.`);return false;}SND.sfx('wobble');t.vol.confuse=2+rnd(4);if(t===active(t.side))fxRun(c=>all(orbit('⭐',up(c.a,46),{r:30,d:1300,turns:2}),orbit('⭐',up(c.a,46),{r:30,d:1300,turns:2,phase:Math.PI*2/3}),orbit('⭐',up(c.a,46),{r:30,d:1300,turns:2,phase:Math.PI*4/3})),t.side);await say(`${label(t)} se hace un lío.`,t.side===0?'Cuidado: tus botones ya no dicen la verdad.':null);return true;}
 async function stepAside(m){
   if(m.p.ability==='regeneracion'&&!m.stepped&&m.hp>0&&m.hp<=m.max/2){m.stepped=true;heal(m,Math.floor(m.max/3));renderPlates();await say(`Paso al lado: ${label(m)} se aparta un momento y recupera PS.`);}
 }
@@ -1374,13 +1456,14 @@ async function useMove(s,a){
     else{await say(`${label(u)} tiene un lío tremendo…`);
       if(Math.random()<1/3){cancelCharge(u);await fxRun(FX_CONFUSED,s);const d=calcDamage(u,u,{power:40,cat:'P',type:null},false,.85+Math.random()*.15);hurt(u,d);flash(s);await say('¡Se lía y se hace daño a sí mismo!',null,{tilt:true});return;}}}
   if(u.status==='par'&&Math.random()<.25){cancelCharge(u);await say(`${label(u)} se queda en blanco y no reacciona.`);return;}
+  if(u.vol.drunk&&!a.forced&&!a.struggle){if(await drunkAct(s,a))return;}
   await execMove(s,id,!!a.forced);
 }
 async function execMove(s,id,forced){
   const u=active(s);let mv=MOVES[id];
   let firstCharge=mv.charge&&!forced;
   if(firstCharge&&mv.charge==='law'&&B.field.w==='sun')firstCharge=false;
-  await say(`${label(u)} usa ${mv.name}.`,firstCharge?null:mv.quip,u.p.id==='rufian'?{tweet:true}:null);
+  await say(`${label(u)} usa ${mv.name}.`,firstCharge?null:(u.vol.drunk&&mv.quip?slur(mv.quip,true)+' ¡Hic!':mv.quip),u.p.id==='rufian'?{tweet:true}:null);
   if(B.sides[s].publico>0&&u.p.id==='abascal'&&mv.cat!=='X')await applaud(s);
   if(B.sides[1-s].publico>0){await booed(s);if(u.p.ability==='competitivo'&&u.stages.spa<6){u.stages.spa++;await say('Abucheo de Vicálvaro: ¡los pitos le crecen!','Sube su Ataque Esp.');}}
   if(mv.eff&&mv.eff.kind==='copycat'){
@@ -1507,10 +1590,10 @@ async function statusMove(s,mv,id){
   }
   if(mv.target==='field'){
     if(k==='weather'){
-      if(B.field.w===mv.eff.w){await say('¡Pero ya está así!');return;}
+      if(B.field.w===mv.eff.w){if(u.p.id==='ayuso'&&mv.eff.w==='sun'){await say('Las terrazas ya están abiertas… así que pide otra.');await addCana(u,s);return;}await say('¡Pero ya está así!');return;}
       const prev=B.field.w;await playFX(id,s);B.field.w=mv.eff.w;B.field.turns=5;renderPlates();
       if(prev)await say(prev==='rain'?'Se acaba la lluvia…':'Se recogen las terrazas…');
-      await say(mv.eff.w==='rain'?'¡Empieza a llover sobre el plató!':'¡Se abren las terrazas!',mv.eff.w==='rain'?'Lo Gallego no falla, lo Tuit pega más y lo Castizo menos.':'Lo Castizo pega más y lo Tuit menos.');return;}
+      await say(mv.eff.w==='rain'?'¡Empieza a llover sobre el plató!':'¡Se abren las terrazas!',mv.eff.w==='rain'?'Lo Gallego no falla, lo Tuit pega más y lo Castizo menos.':'Lo Castizo pega más y lo Tuit menos.');if(u.p.id==='ayuso'&&mv.eff.w==='sun')await addCana(u,s);return;}
     if(k==='obras'){if(B.sides[1-s].obras>0){await say('¡Pero esa calle ya está cortada!');return;}await playFX(id,s);B.sides[1-s].obras=3;renderPlates();await say(`¡Obras en el lado de ${label(t)}!`,'Durante 3 turnos no puede cambiar de político y pierde vida en el atasco.');return;}
     if(k==='caganer'){if(B.sides[1-s].caganer){await say('¡Ya hay un caganer ahí!');return;}await playFX(id,s);B.sides[1-s].caganer=true;renderPlates();await say(`¡Hay un caganer en el lado de ${t.side===0?'tu equipo':'el rival'}!`,'Cada político que entre perderá vida al pisarlo.');return;}
     if(k==='publico'){if(B.sides[s].publico>0){await say('¡Su público ya está aplaudiendo!');return;}await playFX(id,s);B.sides[s].publico=5;renderPlates();await say(`¡Llega el público de ${label(u)}!`,'Le aplaudirán todo y abuchearán al rival.');return;}
@@ -1547,7 +1630,8 @@ async function endTurn(){
     if(m.status==='brn'){hurt(m,Math.max(1,Math.floor(m.max/16)));flash(s);await say(`${label(m)} se resiente de la quemadura.`);await stepAside(m);}
     if(m.hp>0&&m.vol.seed&&o.hp>0&&!isAway(o)){const d=Math.min(m.hp,Math.max(1,Math.floor(m.max/8)));hurt(m,d);heal(o,d);flash(s);await say(`${label(m)} pierde energía escuchando.`,`${label(o)} se la queda.`);await stepAside(m);}
     if(m.hp>0&&B.sides[s].obras>0){const d=Math.max(1,Math.floor(m.max/8));hurt(m,d);flash(s);await say(`${label(m)} sigue atrapado en el atasco de las obras.`);await stepAside(m);}
-    if(m.hp>0&&B.field.w==='sun'&&m.p.id==='ayuso'&&m.hp<m.max){heal(m,Math.max(1,Math.floor(m.max/16)));await say(`${label(m)} se toma algo en la terraza.`,'Recupera un poco de PS.');}
+    if(m.hp>0&&B.field.w==='sun'&&m.p.id==='ayuso'){if(m.hp<m.max){heal(m,Math.max(1,Math.floor(m.max/16)));await say(`${label(m)} se toma algo en la terraza.`,'Recupera un poco de PS.');}await addCana(m,s);}
+    if(m.hp>0&&m.vol.drunk){m.vol.drunk--;if(!m.vol.drunk){delete m.vol.drunk;renderPlates();m.status='slp';m.slp=1+rnd(2);SND.sfx('sad');await fxRun(c=>all(pop('🤕',up(c.a,64),{size:40,d:1100}),word('RESACA',up(c.a,100),{color:'#c3bcb1',size:20,d:1100})),s);renderPlates();await say(`A ${label(m)} se le pasa la fiesta… ¡y llega la resaca!`,'🤕 Se echa una siesta.');}}
   }
   for(const s of [0,1]){
     const sd=B.sides[s];
@@ -1684,20 +1768,20 @@ function getPlayerAction(){
 function choose(a){SND.sfx('blip');const r=B.resolve;B.resolve=null;waitControls();if(r)r(a);}
 function showMoves(){
   const m=active(0),foe=active(1);
-  const dz=!!m.vol.confuse;
-  $('#msgText').textContent=`¿Qué argumento usa ${m.name}?`;$('#msgSub').hidden=true;$('#msg').classList.remove('ready','tweet','tilt');
+  const dk=!!m.vol.drunk,dz=!!m.vol.confuse||dk;
+  $('#msgText').textContent=`¿Qué argumento usa ${dispName(m)}?`;$('#msgSub').hidden=true;$('#msg').classList.remove('ready','tweet','tilt');
   const any=m.moves.some(x=>x.pp>0);
   const perm=dz?shuffle([0,1,2,3]):[0,1,2,3];
   const btns=any?m.moves.map((x,i)=>{const shown=m.moves[perm[i]];const mv=MOVES[shown.id];const e=mv.cat==='X'?1:eff(mv.type,foe.types);const et=mv.cat==='X'?'':effTxt(e);
     const pw=mv.cat==='X'?'Estado':mv.multi?`Pot ${mv.power}×${mv.multi===2?'3-6':'2-5'}`:'Pot '+(mv.eruption?Math.max(1,Math.floor(mv.power*m.hp/m.max)):mv.power);
     return `<button class="move${m.pana?' f82':''}" type="button" data-i="${i}" style="--tc:${TYPES[mv.type].c}" ${x.pp<=0?'disabled':''}>
-      ${et?`<span class="ef${e<1?' bad':''}">${et}</span>`:''}<b>${esc(mv.name)}</b>
+      ${et?`<span class="ef${e<1?' bad':''}">${et}</span>`:''}<b>${esc(dk?slur(mv.name,true):mv.name)}</b>
       <small>${TYPES[mv.type].e} ${pw} · PP ${shown.pp}/${mv.pp}</small></button>`;}).join('')
     :`<button class="move" type="button" data-struggle="1" style="--tc:#c3bcb1;grid-column:1/-1"><b>Pataleta</b><small>Sin PP: patalea y se hace daño</small></button>`;
   const trapped=B.sides[0].obras>0;
   const canSwitch=!trapped&&B.teams[0].some((x,i)=>i!==B.act[0]&&x.hp>0);
-  $('#controls').className='controls'+(dz&&!RM?' dizzy':'');
-  $('#controls').innerHTML=`${dz?'<div class="dzhint">💫 Estás liado: los botones no dicen la verdad.</div>':''}<div class="moves">${btns}</div>
+  $('#controls').className='controls'+(dk&&!RM?' drunkc':dz&&!RM?' dizzy':'');
+  $('#controls').innerHTML=`${dk?'<div class="dzhint drunkh">🍺 Va borracha: los botones bailan y a saber qué hace.</div>':dz?'<div class="dzhint">💫 Estás liado: los botones no dicen la verdad.</div>':''}<div class="moves">${btns}</div>
     <div class="cbar"><button class="btn ghost" type="button" id="cSw" ${canSwitch?'':'disabled'}>${trapped?'🚧 Calle cortada':'🔁 Cambiar'}</button><button class="btn ghost" type="button" id="cInfo">ⓘ Ficha</button></div>`;
   $('#controls').querySelectorAll('.move').forEach(b=>b.onclick=()=>{if(b.dataset.struggle)choose({type:'move',struggle:true});else choose({type:'move',idx:+b.dataset.i});});
   $('#cSw').onclick=async()=>{const idx=await askSwitch(false);if(idx===null)showMoves();else choose({type:'switch',idx});};
