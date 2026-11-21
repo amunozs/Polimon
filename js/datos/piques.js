@@ -16,7 +16,7 @@ const RIV = {
   ],
 
   'felipe|rajoy': [
-    ['rajoy','«Es muy difícil todo esto.»'],
+    ['rajoy','«It’s very difficult todo esto.»'],
     ['felipe','«Para ti, Mariano. Para ti.»']
   ],
 
@@ -77,7 +77,7 @@ const RIV = {
 
   'feijoo|rajoy': [
     ['feijoo','«Mariano, ¿esto cómo iba?»'],
-    ['rajoy','«Es muy difícil todo esto.»']
+    ['rajoy','«It’s very difficult todo esto.»']
   ],
 
   'feijoo|sanchez': [
