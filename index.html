@@ -722,9 +722,8 @@ async function fxSuper(c){
     sprA(c.t,[{transform:'none'},{transform:'scale(1.25,.6) translateY(22px)',offset:.15},{transform:'scale(1.25,.6) translateY(22px)',offset:.6},{transform:'scale(.9,1.12)',offset:.8},{transform:'none'}],850),shake(380,9));
 }
 async function fxWeak(c){
-  SND.sfx('cricket');const W=$('#field').clientWidth,H=$('#field').clientHeight;
-  await all(run(mk('🌾',34),[{transform:T(P(-30,H-26),1,0),opacity:1},{transform:T(P(W*.5,H-34),1,360),opacity:1,offset:.5},{transform:T(P(W+30,H-26),1,720),opacity:1}],1500,{ease:'linear'}),
-    (async()=>{await sleep(500);SND.sfx('yawn');await pop('🥱',P(c.b.x+34,c.b.y-48),{size:34,d:1000});})());
+  SND.sfx('cricket');
+  await sleep(350);SND.sfx('yawn');await pop('🥱',P(c.b.x+34,c.b.y-48),{size:34,d:1000});
 }
 async function fxMiss(c){
   SND.sfx('whoosh');const el=$('#sp'+c.t);const o=el.style.transformOrigin;el.style.transformOrigin='50% 100%';const dir=c.t===1?1:-1;
