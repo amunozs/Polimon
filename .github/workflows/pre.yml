@@ -1,0 +1,13 @@
+# Se lanza con cada cambio en la rama pre y avisa a "Publicar web" para que
+# vuelva a publicar las dos versiones (producción en / y preproducción en /pre/).
+name: Cambio en preproducción
+
+on:
+  push:
+    branches: [pre]
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Nueva versión en la rama pre"

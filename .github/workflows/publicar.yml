@@ -6,7 +6,12 @@ name: Publicar web
 
 on:
   push:
-    branches: [main, pre]
+    branches: [main]
+  # Los cambios en la rama pre llegan a través de "Cambio en preproducción"
+  # (así la publicación siempre se lanza desde main, que es la rama autorizada).
+  workflow_run:
+    workflows: ["Cambio en preproducción"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
