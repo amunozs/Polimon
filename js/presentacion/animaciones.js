@@ -173,6 +173,22 @@ const FX={
   },
   maletero:async c=>{await all(pop('🚘',c.a,{size:76,d:1000}),sprA(c.s,[{opacity:1},{opacity:0,offset:.2},{opacity:0,offset:.8},{opacity:1}],1000),ring(c.a,{color:'#ad9ff3',delay:200}));},
   referendum:async c=>{const f=$('#field');REFC&&REFC.remove();REFC=document.createElement('div');REFC.className='refbox';REFC.innerHTML='🗳️ SÍ: <b>0%</b>';f.appendChild(REFC);REFC.style.left=Math.max(6,Math.min(f.clientWidth-130,c.b.x-140))+'px';REFC.style.top=Math.max(6,c.b.y-30)+'px';await all(pop('🥡',up(c.b,56),{size:44,d:800}),word('URNA DE TÁPER',up(c.b,96),{size:16,d:900}));},
+  segadors:async c=>{
+    const W=$('#field').clientWidth,H=$('#field').clientHeight;
+    const flag=document.createElement('div');flag.className='fxi';flag.style.cssText=`left:0;top:0;width:${W}px;height:${H}px;background:repeating-linear-gradient(180deg,#fcdd09 0 11.11%,#da121a 11.11% 22.22%);opacity:0`;$('#fx').appendChild(flag);
+    flag.animate([{opacity:0,transform:'skewY(0deg)'},{opacity:.32,transform:'skewY(-3deg)',offset:.2},{opacity:.3,transform:'skewY(3deg)',offset:.6},{opacity:.26,transform:'skewY(-2deg)',offset:.85},{opacity:0,transform:'skewY(0deg)'}],{duration:3200*FXS(),fill:'forwards'});
+    SND.sfx('segadors');
+    const u=active(c.s);
+    const tv=mk(`<div style="background:#1c1a24;border:4px solid #444;border-radius:10px;padding:4px;width:120px;box-shadow:0 4px 0 #0008"><div style="position:relative;background:#2a3550;border-radius:5px;overflow:hidden;height:82px"><img src="${IMG(u.p.id)}" style="width:100%;height:100%;object-fit:contain"><span style="position:absolute;left:4px;top:4px;background:#e5333d;color:#fff;font:800 8px/1 system-ui;padding:2px 4px;border-radius:3px">● EN DIRECTO</span></div><div style="color:#ffd36b;font:800 9px/1.2 system-ui;text-align:center;margin-top:3px">DESDE WATERLOO</div></div>`,12);
+    const tp=P(Math.min(W-70,Math.max(70,c.a.x)),Math.max(60,c.a.y-90));
+    await tv.animate([{transform:T(tp,.2,0),opacity:0},{transform:T(tp,1,-3),opacity:1}],{duration:350*FXS(),fill:'forwards'}).finished.catch(()=>{});
+    await all(word('🎵 Bon cop de…',P(W/2,H*.16),{color:'#fcdd09',size:20,d:1400,rot:-3}),sprA(c.s,[{transform:'none'},{transform:'translateY(-6px)'},{transform:'none'},{transform:'translateY(-6px)'},{transform:'none'}],1400));
+    const sk='<svg width="46" height="46" viewBox="0 0 46 46"><path d="M8 38 C 4 16, 26 2, 42 10 C 30 8, 14 18, 16 36 Z" fill="#d9dde6" stroke="#1c1a24" stroke-width="2.5" stroke-linejoin="round"/><rect x="5" y="34" width="7" height="12" rx="2" fill="#8a5a2b" stroke="#1c1a24" stroke-width="2" transform="rotate(-20 8 40)"/></svg>';
+    const ss=[0,1,2].map(i=>fly(sk,P(W*(.2+i*.3),-30),P(c.b.x+(i-1)*18,c.b.y-6),{d:520,size:16,spin:720,delay:i*140,ease:'ease-in'}));
+    await all(...ss,word('¡FALÇ!',up(c.b,60),{color:'#fcdd09',size:30,d:900,delay:420}));
+    SND.sfx('slap');shake(420,10);flashScr('#fcdd09',220);
+    await all(burst(['✨','💥'],c.b,{n:7,size:22,r:60}),tv.animate([{opacity:1},{opacity:0}],{duration:300*FXS(),fill:'forwards'}).finished.catch(()=>{}));
+  },
   caganer:async c=>{await all(fly('💩',c.a,P(c.b.x+40,c.b.y+40),{d:700,arc:90,size:30,spin:360,ease:'ease-out'}),word('¡Bon Nadal!',up(c.a,58),{size:20,d:900}));},
   independencia:async c=>{await all(letterbox(1700),word('¡INDEPENDENCIA!',P((c.a.x+c.b.x)/2,(c.a.y+c.b.y)/2),{size:26,d:1300,rot:-4}));await all(lunge(c,{dist:70,d:420}),cam(c,{z:1.08,d:500}));shake(500,10);await burst(['💥','🎆'],c.b,{n:8,size:26});},
   zasca:[async c=>{await fly('👋',c.a,c.b,{d:280,size:46,ease:'ease-in'});await all(word('¡ZASCA!',up(c.b,40),{color:'#67a9f2',size:36}),flashScr('#ffffff',200),shake(350,10));},

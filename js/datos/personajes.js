@@ -138,7 +138,7 @@ const POL = [
     types: ['fug'],
     base: [85,120,70,50,60,100],
     ability: 'intimidacion',
-    moves: ['maletero','referendum','caganer','independencia'],
+    moves: ['maletero','referendum','segadors','independencia'],
     entry: 'Ha vuelto… de momento.',
     ko: '«Me voy… otra vez.»'
   },

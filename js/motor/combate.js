@@ -135,6 +135,7 @@ async function execMove(s,id,forced){
 async function attack(s,mv,id){
   const u=active(s),t=active(1-s);
   if(t.hp<=0){await say('¡Pero no hay nadie enfrente!');return;}
+  if(mv.breaks){const br=[];if(t.vol.protect){delete t.vol.protect;br.push('la protección');}if(t.vol.sub>0){delete t.vol.sub;br.push('el chalet');}if(t.vol.otan){t.vol.otan=false;delete t.vol.otanHit;br.push('el escudo de la OTAN');}if(br.length){renderPlates();SND.sfx('slap');await say(`¡La falç siega ${br.join(' y ')} de ${label(t)}!`);}}
   if(t.vol.protect){await say(`¡${label(t)} se ha protegido!`);return;}
   if(isAway(t)){await say(`¡${label(t)} está de gira! No hay nadie a quien atacar.`);return;}
   if(t.vol.vase>0){SND.sfx('lock');await say('El jarrón chino aguanta el golpe.','Tiene mucho valor, pero nadie sabe dónde ponerlo.');return;}
@@ -159,7 +160,7 @@ async function attack(s,mv,id){
   let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false;
   for(let i=0;i<n;i++){
     if(t.hp<=0)break;
-    const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24;
+    const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);
     let dmg=calcDamage(u,t,mv,crit,.85+Math.random()*.15);
     if(mv.multi&&PERHIT[id])fxRun(PERHIT[id],s);
     if(t.vol.sub>0&&!mv.sound){
@@ -183,6 +184,7 @@ async function attack(s,mv,id){
   if(REFC){const b=REFC.querySelector('b');b.textContent='92%';SND.sfx('applause');const r=REFC;REFC=null;setTimeout(()=>r.remove(),1600);}
   if(anyCrit&&!hitSub){SND.sfx('ooh');const ch=chyron();await say('¡Golpe crítico! Esto abre el telediario.');unchyron(ch);}
   if(!hitSub){if(e>1){await fxRun(fxSuper,s);await say('¡Es súper eficaz! El argumento ha calado.');}else if(e<1){await fxRun(fxWeak,s);await say('No es muy eficaz… nadie lo ha retuiteado.');}}
+  if(id==='segadors'&&t.p.id==='abascal'&&t.hp>0)await say(`💬 ${label(t)}`,null,{bub:{s:1-s,m:t,line:'¡A por ellos!'}});
   if(vaseNow){t.vased=true;t.vol={vase:2};t.stages={atk:0,def:0,spa:0,spd:0,spe:0};SND.sfx('gong');await fxRun(c=>all(pop('🏺',c.b,{size:90,d:1100}),word('JARRÓN CHINO',up(c.b,70),{size:24,d:1200})),s);renderPlates();await say(`¡${label(t)} se convierte en un jarrón chino!`,'Tiene mucho valor, pero nadie sabe dónde ponerlo. Aguantará los golpes un par de turnos.');return;}
   if(capped){await fxRun(c=>stamp('¡TOPE!',c.b),s);await say('¡TOPE! No se le puede cobrar más.',`Limitar alquileres protege a ${label(t)}.`);}
   await resistCheck();

@@ -74,6 +74,11 @@ const SND=(()=>{
     organillo:()=>arp(['G5','E5','G5','C6','B5','A5','G5','E5','F5','D5'],{d:.13,type:'square',v:.16,gap:.12}),
     glug:()=>{for(let i=0;i<4;i++)tone({f:300-i*30,f2:180,d:.08,type:'sine',v:.4,t:i*.11});},
     roll:()=>{let t=0,iv=.13;while(t<5.1){noise({d:.05,v:Math.min(.55,.08+t*.09),f:1800,q:1.2,t});t+=iv;iv=Math.max(.028,iv*.965);}},
+    // Inspirado en los acordes del estribillo de Els Segadors (Mi menor): Mim – Sol – Lam – Si7 – Re – Mim
+    segadors:()=>{const N={E3:164.8,G3:196,A3:220,B3:246.9,D4:293.7,E4:329.6,Fs4:370,G4:392,A4:440,B4:493.9,C5:523.3,D5:587.3,E5:659.3,Ds5:622.3};
+      const bar=[['E3',['E4','G4','B4']],['G3',['D5','B4','G4']],['A3',['C5','E5','A4']],['B3',['B4','Ds5','Fs4']],['D4',['D5','A4','Fs4']],['E3',['E5','B4','G4']]];
+      let t=0;for(const[b,ch]of bar){tone({f:N[b],d:.5,type:'triangle',v:.35,t});ch.forEach((n,i)=>tone({f:N[n],d:.16,type:'square',v:.11,t:t+i*.17}));t+=.52;}
+      tone({f:N.E4,d:.6,type:'square',v:.16,t});tone({f:N.E3,d:.6,type:'triangle',v:.35,t});},
     fanfare:()=>arp(['C5','E5','G5','C6','G5','C6'],{d:.14,v:.35,gap:.11}),
     sad:()=>{tone({f:392,f2:370,d:.3,type:'sawtooth',v:.25});tone({f:370,f2:349,d:.3,type:'sawtooth',v:.25,t:.32});tone({f:349,f2:262,d:.8,type:'sawtooth',v:.25,t:.64,vib:6});},
     cluck:()=>{for(let i=0;i<3;i++)tone({f:700,f2:500,d:.07,v:.3,t:i*.11});},

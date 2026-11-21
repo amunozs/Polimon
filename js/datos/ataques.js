@@ -378,6 +378,19 @@ const MOVES = {
     quip: 'Saca las urnas.'
   },
 
+  segadors: {
+    name: 'Els Segadors',
+    type: 'epi',
+    cat: 'P',
+    power: 85,
+    acc: 100,
+    pp: 10,
+    highCrit: 1,
+    breaks: 1,
+    desc: '¡Bon cop de falç! Golpe con muchos críticos que siega las protecciones del rival (protección, chalet y escudo de la OTAN).',
+    quip: '«Bon cop de falç!»'
+  },
+
   caganer: {
     name: 'Caganer',
     type: 'mit',
