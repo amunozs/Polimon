@@ -143,9 +143,20 @@ img{display:block;max-width:100%}
 .drunkbn{display:inline-block;background:linear-gradient(#ffd36b,#f0a530);color:#3a2206;border:4px solid #3a2206;border-radius:12px;padding:6px 14px;font-family:var(--display);font-size:24px;text-align:center;box-shadow:4px 5px 0 #0008;white-space:nowrap}
 .drunkbn small{display:block;font-size:12px;letter-spacing:1px}
 .retro{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.retro .ph{position:absolute;background:#efe3c4;padding:6px 6px 18px;box-shadow:3px 4px 10px #000b;opacity:0}
-.retro .ph img{display:block;width:100%;height:auto;filter:contrast(1.05)}
-.retro .ph.np{padding:3px;background:#e8dcc0}
+.retro .ph{position:absolute;left:4%;right:4%;top:9%;height:64%;background:#efe3c4;padding:6px;box-shadow:4px 6px 18px #000c;opacity:0;will-change:transform}
+.retro .ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 25%}
+.retro .ph.np{left:50%;right:auto;top:4%;height:86%;width:auto;aspect-ratio:378/520;transform:translateX(-50%);padding:3px;background:#e8dcc0}
+.retro .ph.np img{object-fit:contain}
+.stage .psoe{position:absolute;inset:0;opacity:0;transition:opacity 1s;overflow:hidden}
+.stage.psoe .psoe{opacity:1}
+.stage .psoe .sun{position:absolute;left:50%;top:42%;width:260%;aspect-ratio:1;translate:-50% -50%;background:repeating-conic-gradient(#d4202a 0 9deg,#a8111b 9deg 18deg);animation:psoeSpin 60s linear infinite}
+@keyframes psoeSpin{to{rotate:360deg}}
+.stage .psoe .glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,#ff6a5a55,transparent 55%),linear-gradient(transparent 55%,#4a050aee 100%)}
+.stage .psoe .logo{position:absolute;left:50%;top:40%;height:78%;translate:-50% -50%;opacity:.3;filter:drop-shadow(0 0 18px #ffb3a0)}
+.stage .psoe .pet{position:absolute;top:-30px;font-size:18px;opacity:.75;animation:petal linear infinite}
+@keyframes petal{to{transform:translateY(560px) rotate(540deg)}}
+.stage .psoe .lema{position:absolute;left:0;right:0;bottom:30px;text-align:center;font-family:var(--display);font-size:20px;letter-spacing:3px;color:#ffe3d2;opacity:.35}
+.stage.psoe .wall,.stage.psoe .floor,.stage.psoe .beam{opacity:0;transition:opacity 1s}
 .retro::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 37px,#00000012 37px 38px,transparent 38px 91px,#ffffff10 91px 92px);animation:retroFl .18s steps(2) infinite}
 @keyframes retroFl{50%{opacity:.4;transform:translateX(3px)}}
 .sprite.drunk img{filter:saturate(1.35) sepia(.18) hue-rotate(-12deg)}
@@ -395,7 +406,7 @@ img{display:block;max-width:100%}
       </div>
     </div>
     <div class="field" id="field">
-      <div class="stage" id="stage"><div class="wall"></div><div class="floor"></div><div class="beam l"></div><div class="beam r"></div><div class="crowd" id="crowd"><i></i><i></i></div><div class="live"><b></b>DIRECTO</div></div>
+      <div class="stage" id="stage"><div class="wall"></div><div class="floor"></div><div class="psoe"><div class="sun"></div><div class="glow"></div><img class="logo" src="img/retro/psoe.webp" alt="" loading="lazy"><i class="pet" style="left:8%;animation-duration:7s">🌹</i><i class="pet" style="left:30%;animation-duration:9s;animation-delay:-3s">🌹</i><i class="pet" style="left:55%;animation-duration:8s;animation-delay:-5s">🌹</i><i class="pet" style="left:78%;animation-duration:10s;animation-delay:-1s">🌹</i><i class="pet" style="left:92%;animation-duration:7.5s;animation-delay:-6s">🌹</i><div class="lema">POR EL CAMBIO</div></div><div class="beam l"></div><div class="beam r"></div><div class="crowd" id="crowd"><i></i><i></i></div><div class="live"><b></b>DIRECTO</div></div>
       <div id="wx"></div>
       <div id="ftag"></div>
       <div class="row foe-row">
@@ -974,7 +985,7 @@ function drunkVisuals(){
     el.classList.toggle('drunk',dr);const ph=dr?dkPhase(m):0;['p1','p2','p3'].forEach((c,i)=>el.classList.toggle(c,ph===i+1));if(ph>maxp)maxp=ph;
     if(dr&&!el.querySelector('.ghost')){const im=el.querySelector('img');if(im){const g=im.cloneNode();g.className='ghost';g.alt='';el.appendChild(g);}const b1=document.createElement('span');b1.className='bubs';b1.textContent='🫧';const b2=document.createElement('span');b2.className='bubs b2';b2.textContent='🫧';el.append(b1,b2);}
     if(!dr)el.querySelectorAll('.ghost,.bubs').forEach(e=>e.remove());}
-  const fe=$('#field');fe.classList.toggle('drunkf',any&&!RM&&SPEED!==0);['dk1','dk2','dk3'].forEach((c,i)=>fe.classList.toggle(c,any&&maxp===i+1));
+  stageTheme();const fe=$('#field');fe.classList.toggle('drunkf',any&&!RM&&SPEED!==0);['dk1','dk2','dk3'].forEach((c,i)=>fe.classList.toggle(c,any&&maxp===i+1));
 }
 async function hiccup(s){SND.sfx('hic');await fxRun(c=>all(word('¡HIC!',up(c.a,70),{color:'#ffd36b',size:20,d:650,rot:-8}),sprA(c.s,[{transform:'none'},{transform:'translateY(-14px) rotate(-6deg)',offset:.3},{transform:'none'}],400)),s);}
 async function addCana(m,s){
@@ -1077,25 +1088,28 @@ async function resistFX(s){
 }
 const RETRO=[['puno',176,.27,.22,-7],['cartel',132,.80,.26,6],['micro',130,.20,.70,5],['congreso',180,.74,.72,-5],['sonrisa',128,.52,.46,-3]];
 let RETROPRE=null;
-function preloadRetro(){if(RETROPRE)return;RETROPRE=[...RETRO.map(r=>r[0]),'portada'].map(k=>{const i=new Image();i.src=`img/retro/${k}.webp`;return i;});}
+function preloadRetro(){if(RETROPRE)return;RETROPRE=[...RETRO.map(r=>r[0]),'portada','psoe'].map(k=>{const i=new Image();i.src=`img/retro/${k}.webp`;return i;});}
 async function retroMontage(){
-  const st=$('#stage');if(!st)return;const W=st.clientWidth,H=st.clientHeight;
+  const st=$('#stage');if(!st)return;
   const box=document.createElement('div');box.className='retro';st.appendChild(box);
   clearBubbles();const hid=[$('#plate0'),$('#plate1'),$('#sp1').closest('.pod')].filter(Boolean);hid.forEach(e=>{e.style.transition='opacity .4s';e.style.opacity='.06';});box._hid=hid;
-  for(const [k,w,fx,fy,rot] of RETRO){
-    const d=document.createElement('div');d.className='ph';d.style.width=w+'px';d.innerHTML=`<img src="img/retro/${k}.webp" alt="">`;
-    d.style.left=(W*fx-w/2)+'px';d.style.top=(H*fy-w*.45)+'px';box.appendChild(d);
+  const W=st.clientWidth;let k=0;
+  for(const [id] of RETRO){
+    const d=document.createElement('div');d.className='ph';d.innerHTML=`<img src="img/retro/${id}.webp" alt="">`;box.appendChild(d);
+    const rot=k%2?2:-2;k++;
     SND.sfx('camera');
-    d.animate([{opacity:0,transform:`rotate(${rot*2}deg) scale(1.25)`},{opacity:.85,transform:`rotate(${rot}deg) scale(1)`,offset:.15},{opacity:.7,transform:`rotate(${rot}deg) scale(1.08)`}],{duration:2800*FXS(),easing:'ease-out',fill:'forwards'});
-    await sleep(380);
+    d.animate([{opacity:1,transform:`translateX(${W}px) rotate(${rot*3}deg)`},{opacity:1,transform:`translateX(0) rotate(${rot}deg) scale(1)`,offset:.22},{opacity:1,transform:`translateX(-8px) rotate(${rot}deg) scale(1.07)`,offset:.78},{opacity:1,transform:`translateX(${-W}px) rotate(${-rot*3}deg) scale(1.07)`}],{duration:1350*FXS(),easing:'ease-in-out',fill:'forwards'});
+    await sleep(1050);
   }
-  const np=document.createElement('div');np.className='ph np';np.style.width='200px';np.innerHTML='<img src="img/retro/portada.webp" alt="">';np.style.left=(W/2-100)+'px';np.style.top=(H/2-150)+'px';box.appendChild(np);
-  await np.animate([{opacity:0,transform:'rotate(-540deg) scale(.1)'},{opacity:1,transform:'rotate(-4deg) scale(1.08)',offset:.8},{opacity:1,transform:'rotate(-4deg) scale(1)'}],{duration:700*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
-  SND.sfx('thud');shake(400,8);
-  await sleep(1300);
+  await sleep(250);
+  const np=document.createElement('div');np.className='ph np';np.innerHTML='<img src="img/retro/portada.webp" alt="">';box.appendChild(np);
+  await np.animate([{opacity:0,transform:'translateX(-50%) rotate(-540deg) scale(.1)'},{opacity:1,transform:'translateX(-50%) rotate(-3deg) scale(1.06)',offset:.8},{opacity:1,transform:'translateX(-50%) rotate(-3deg) scale(1)'}],{duration:750*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
+  SND.sfx('thud');shake(450,9);
+  await sleep(1500);
   box.animate([{opacity:1},{opacity:0}],{duration:400*FXS(),fill:'forwards'});
   return box;
 }
+function stageTheme(){if(!B||!B.teams)return;const on=[0,1].some(s=>{const m=active(s);return m&&m.pana&&m.hp>0;});const st=$('#stage');if(st)st.classList.toggle('psoe',on);}
 async function transformPana(s){
   const u=active(s);
   SND.music(null);SND.sfx('tvon');
@@ -1115,7 +1129,7 @@ async function transformPana(s){
     await sleep(200);
     SND.sfx('whoosh');
     await all(sprA(c.s,[{transform:'none'},{transform:'rotate(360deg) scale(1.2)'},{transform:'rotate(720deg) scale(1.3)'},{transform:'rotate(1080deg) scale(1)'}],1100,{ease:'ease-in'}),glow(c.s,'#ffffff',1100),burst(['👔','💼','🚬'],c.a,{n:9,size:30,r:90,d:900,delay:500}));
-    u.pana=true;const img=$('#sp'+s+' img');if(img)img.src=IMG('felipe82');
+    u.pana=true;const img=$('#sp'+s+' img');if(img)img.src=IMG('felipe82');stageTheme();
     f.style.filter='';sc.remove();sb.remove();cap.remove();if(rbox){(rbox._hid||[]).forEach(e=>{e.style.opacity='';setTimeout(()=>e.style.transition='',450);});rbox.remove();}
     SND.sfx('crit');SND.sfx('applause');SND.sfx('chant');
     await all(flashScr('#ffffff',500),rain('🌹',P(f.clientWidth/2,f.clientHeight/2),{n:22,size:28,spread:f.clientWidth,h:f.clientHeight/2+40,stagger:45,d:1000}),
