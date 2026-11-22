@@ -30,6 +30,10 @@ const ABIL = {
     d: 'La primera vez que baja de la mitad de PS, se aparta un momento y recupera 1/3.'
   },
   intimidacion: {n:'Llegada triunfal',d:'Al entrar en combate, baja el Ataque del rival.'},
+  maletero: {
+    n: 'Maletero',
+    d: 'La primera vez que un ataque le iba a dejar KO, se mete en un maletero y huye: no recibe el golpe y entra un compañero. Si es el último que queda, no tiene escapatoria.'
+  },
   torrente: {n:'18 meses',d:'Cuando parece que se va, se crece: con 1/3 de PS o menos, Tuit +50%.'},
   presion: {n:'Presión',d:'El rival gasta 2 PP por ataque intentando entenderle.'},
   jarron: {
@@ -133,12 +137,12 @@ const POL = [
 
   {
     id: 'puigdemont',
-    name: 'Puchi Procés',
-    short: 'Puchi Procés',
+    name: 'Puchi Esteladas',
+    short: 'Puchi Esteladas',
     types: ['fug'],
     base: [85,120,70,50,60,100],
-    ability: 'intimidacion',
-    moves: ['maletero','referendum','caganer','independencia'],
+    ability: 'maletero',
+    moves: ['proces','referendum','segadors','independencia'],
     entry: 'Ha vuelto… de momento.',
     ko: '«Me voy… otra vez.»'
   },
