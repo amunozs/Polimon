@@ -382,12 +382,12 @@ const MOVES = {
     name: 'Procés',
     type: 'fug',
     cat: 'P',
-    power: 50,
+    power: 65,
     acc: 100,
     pp: 15,
-    proces: 1,
-    desc: 'Avanza por fases: Consulta (50), Declaración (80) e ¡Independencia! (140). Después… vuelta a empezar.',
-    quip: '«Esto va por fases.»'
+    sec: {status:'slp',chance:.3,msg:'¡El procés es tan largo que {t} se ha quedado roque!'},
+    desc: 'Golpe normal con un 30% de que el rival se duerma de aburrimiento.',
+    quip: '«Esto va para largo…»'
   },
 
   segadors: {
