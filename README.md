@@ -88,6 +88,14 @@ Necesitan Python y Playwright (`pip install playwright && playwright install chr
 - `python3 pruebas/partida_real.py` — 4 combates completos a velocidad real, con animaciones; avisa de errores.
 - `python3 pruebas/dificultad.py` — cuánto gana un jugador humano típico contra la máquina.
 
+## Estadísticas
+
+El juego puede contar visitas y partidas de forma anónima con [GoatCounter](https://www.goatcounter.com/) (sin cookies ni datos personales). Se configura en `config.js` → `analitica` y solo cuenta en producción (`amunozs.github.io`). Eventos que se registran:
+
+- `evento/partida-empezada`, `evento/victoria`, `evento/derrota`
+- `evento/personaje/<id>` por cada personaje elegido
+- `evento/felipe-desbloqueado`
+
 ## Pendiente para Android
 
 - Las fuentes se cargan de Google Fonts; para que la app funcione sin conexión habrá que incluirlas en el proyecto.
