@@ -19,7 +19,8 @@ $('#btnHow').onclick=()=>openSheet(`<h2>Cómo se juega</h2><ol style="line-heigh
   <li>Cada turno, elige un argumento. Los botones marcan ×2 si es súper eficaz contra el rival.</li>
   <li>Puedes cambiar de político cuando quieras, como en Pokémon.</li>
   <li>Gana quien deje al rival sin argumentos. Toca el cuadro de texto para avanzar más rápido.</li>
-  <li>Gana un combate para desbloquear a un personaje legendario.</li></ol>`);
+  <li>Gana un combate para desbloquear a un personaje legendario.</li></ol>
+  <p style="font-size:12px;opacity:.75;margin-top:12px">Este juego cuenta visitas y partidas de forma anónima, sin cookies ni datos personales, solo para saber cuánta gente juega.</p>`);
 
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeSheet();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
@@ -37,3 +38,6 @@ renderGrid();renderTitle();syncSoundBtns();
 
 // Distintivo de preproducción
 if(ENTORNO==='pre'){const b=document.createElement('div');b.className='prebadge';b.textContent='PRE';document.body.appendChild(b);}
+
+// Estadísticas anónimas (solo en producción, ver config.js)
+if(ANALITICA_ON){const g=document.createElement('script');g.async=true;g.src='https://gc.zgo.at/count.js';g.dataset.goatcounter=`https://${CONFIG.analitica.codigo}.goatcounter.com/count`;document.head.appendChild(g);}

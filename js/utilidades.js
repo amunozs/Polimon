@@ -16,3 +16,10 @@ function effTxt(e){return e===0?'×0':e===.25?'×¼':e===.5?'×½':e===2?'×2':e
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const avs=p=>`<div class="avs" style="--c1:${c1(p)}66"><img src="${IMG(p.id)}" alt=""></div>`;
 
+
+/* ---------- Estadísticas anónimas (GoatCounter) ---------- */
+// evento('victoria') → aparece en tu panel como «evento/victoria».
+function evento(nombre){
+  if(!ANALITICA_ON)return;
+  try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:'evento/'+nombre,title:nombre,event:true});}catch(_){}
+}

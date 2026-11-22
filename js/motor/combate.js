@@ -57,8 +57,9 @@ async function boost(m,b,src,abil){
   }
 }
 function immuneTo(t,st){return(st==='par'&&t.types.includes('gal'))||(st==='brn'&&t.types.includes('cas'))||(st==='frz'&&t.types.includes('hem'));}
-async function inflict(t,st){
+async function inflict(t,st,msg){
   if(t.status||immuneTo(t,st))return false;
+  if(st==='slp'){t.status='slp';t.slp=1+rnd(2);SND.sfx('yawn');if(t===active(t.side))fxRun(c=>all(rise(['💤','💤','💤'],up(c.a,30),{n:3,size:26}),sprA(c.s,[{transform:'none'},{transform:'rotate(-8deg) translateY(4px)'},{transform:'rotate(-8deg) translateY(4px)'}],700)),t.side);await say(msg?msg.replace('{t}',label(t)):`¡${label(t)} se ha quedado roque!`,'💤 Se pasará uno o dos turnos durmiendo.');return true;}
   t.status=st;SND.sfx(st==='par'?'zap':st==='brn'?'fire':'ice');
   if(st==='par')await say(`${label(t)} se queda en blanco. Puede que no reaccione.`);
   if(st==='brn')await say(`${label(t)} se ha quemado.`);
@@ -110,7 +111,6 @@ async function useMove(s,a){
 }
 async function execMove(s,id,forced){
   const u=active(s);let mv=MOVES[id];
-  if(mv.proces){const ph=u.proces||0;mv={...mv,power:[50,80,140][ph],name:`Procés · fase ${ph+1}: ${['Consulta','Declaración','¡Independencia!'][ph]}`};}
   let firstCharge=mv.charge&&!forced;
   if(firstCharge&&mv.charge==='law'&&B.field.w==='sun')firstCharge=false;
   await say(`${label(u)} usa ${mv.name}.`,firstCharge?null:(u.vol.drunk&&mv.quip?slur(mv.quip,true)+' ¡Hic!':mv.quip),u.p.id==='rufian'?{tweet:true}:null);
@@ -132,7 +132,6 @@ async function execMove(s,id,forced){
   if(forced)u.vol.charging=null;
   if(mv.charge==='law'&&!forced&&B.field.w==='sun')await say('Con las terrazas abiertas, se vota sin esperar.');
   if(mv.cat==='X')return statusMove(s,mv,id);
-  if(mv.proces){await attack(s,mv,id);if(B.over)return;u.proces=((u.proces||0)+1)%3;renderPlates();if(!u.proces&&u.hp>0)await say('…y vuelta a empezar.','🔁 El procés nunca se acaba.');return;}
   return attack(s,mv,id);
 }
 async function attack(s,mv,id){
@@ -199,7 +198,7 @@ async function attack(s,mv,id){
   if(!hitSub)await stepAside(t);
   if(!hitSub&&t.hp>0){
     if(mv.type==='cas'&&t.status==='frz'){t.status=null;await say(`${label(t)} reacciona por fin.`);}
-    if(mv.sec&&Math.random()<mv.sec.chance)await inflict(t,mv.sec.status);
+    if(mv.sec&&Math.random()<mv.sec.chance)await inflict(t,mv.sec.status,mv.sec.msg);
     if(mv.secVol&&Math.random()<mv.secVol.confuse)await confuse(t);
     if(mv.flinch&&!B.acted.has(1-s)&&Math.random()<mv.flinch)t.vol.flinch=true;
     if(mv.secTarget&&Math.random()<mv.secTarget.chance)await boost(t,{def:mv.secTarget.def},u);

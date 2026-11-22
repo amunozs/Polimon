@@ -68,6 +68,7 @@ function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.to
 async function startBattle(ids){
   ABORT=false;if(skipFn)skipFn();
   lastTeam=ids.slice();
+  evento('partida-empezada');ids.forEach(id=>evento('personaje/'+id));
   const foeIds=shuffle(POL.filter(p=>!p.legend).map(p=>p.id).filter(id=>!ids.includes(id))).slice(0,3);
   B={teams:[ids.map(id=>makeMon(id,0)),foeIds.map(id=>makeMon(id,1))],act:[0,0],lastMove:null,over:false,acted:new Set(),resolve:null,rivSeen:new Set(),lastKO:null,
      field:{w:null,turns:0},sides:[{obras:0,caganer:false,publico:0,rescate:false},{obras:0,caganer:false,publico:0,rescate:false}],animating:false};
@@ -95,6 +96,7 @@ function headline(){
   return{h,sub};
 }
 function finish(won){
+  evento(won?'victoria':'derrota');
   const left=B.teams[0].filter(m=>m.hp>0).length;
   const{h,sub}=headline();
   $('#field').classList.remove('dizzy');
@@ -111,6 +113,7 @@ function finish(won){
   $('#eNew').onclick=()=>{$('#end').classList.remove('on');show('select');SND.music('title');};
 }
 function showUnlock(){
+  evento('felipe-desbloqueado');
   const u=$('#unlock');
   $('#ulBox').innerHTML=`<div class="ttl">¡NUEVO PERSONAJE DESBLOQUEADO!</div><div class="pic" id="ulPic"><img src="${IMG('felipe')}" alt="Felipe GALzález"></div><div class="nm">Felipe GALzález</div><span class="lgtag">⭐ LEGENDARIO</span><p>Jarrón chino, OTAN, Isidoro… y una chaqueta de pana que lo cambia todo.</p><button class="btn" type="button" id="ulPlay">⭐ Jugar con él</button><button class="btn ghost" type="button" id="ulSkip">Ver el resultado</button>`;
   u.classList.add('on');SND.sfx('legend');
