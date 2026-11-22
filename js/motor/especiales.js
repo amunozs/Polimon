@@ -192,28 +192,55 @@ async function transformPana(s){
 }
 
 /* ---------- Maletero de Puchi ---------- */
+// Rótulo de habilidad: entra desde el lado del personaje (sirve para cualquier habilidad)
+async function abilityBanner(s,name,sub){
+  SND.sfx('chime');
+  await fxRun(c=>{const W=$('#field').clientWidth;const at=P(W/2,c.a.y-70<40?60:c.a.y-70);
+    return run(mk(`<div class="drunkbn" style="background:linear-gradient(#fff6c8,#ffd36b)"><small>⭐ HABILIDAD</small>${esc(name)}<small style="margin-top:3px;letter-spacing:0;font-size:11px">${esc(sub)}</small></div>`,16),
+      [{transform:T(P(c.s===0?-200:W+200,at.y),1,0),opacity:1},{transform:T(at,1,-3),opacity:1,offset:.18},{transform:T(at,1,-3),opacity:1,offset:.85},{transform:T(at,1,-3),opacity:0}],1700,{ease:'ease-out'});},s);
+}
 async function fxTrunk(c,escape){
-  const W=$('#field').clientWidth,dir=c.s===0?1:-1,y=c.a.y+18;
-  SND.sfx('engine');
-  const car=mk('<span style="display:inline-block;transform:scaleX('+(dir>0?-1:1)+')">🚗</span>',64);
-  const from=P(c.s===0?-60:W+60,y),at=P(c.a.x+dir*44,y);
-  await car.animate([{transform:T(from,1,0),opacity:1},{transform:T(at,1,0),opacity:1}],{duration:650*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{});
-  SND.sfx('door');
+  const f=$('#field'),W=f.clientWidth,dir=c.s===0?1:-1,y=c.a.y+22;
+  const from=P(c.s===0?-70:W+70,y),at=P(c.a.x+dir*58,y);
+  SND.sfx('screech');SND.sfx('engine');
+  const car=mk(`<div style="position:relative;display:inline-block"><span style="display:inline-block;font-size:76px;transform:scaleX(${dir>0?-1:1})">🚗</span><div class="trunk" style="position:absolute;${dir>0?'left':'right'}:2px;top:22px;width:30px;height:16px;background:#7a0d12;border:3px solid #1c1a24;border-radius:3px;transform-origin:${dir>0?'left':'right'} bottom;transform:rotate(0deg)"></div></div>`,16);
+  car.style.opacity='1';const lid=car.querySelector('.trunk');
+  await all(car.animate([{transform:T(from,1,0)},{transform:T(P(at.x+dir*14,y),1,dir*-6),offset:.8},{transform:T(at,1,0)}],{duration:700*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{}),
+    word('¡ÑIIIIC!',P(at.x,y-56),{color:'#fff',size:20,d:700,delay:350}),rain('💨',P(at.x-dir*40,y+10),{n:4,size:18,spread:40,h:4,stagger:40,d:500,delay:300}));
+  lid.animate([{transform:'rotate(0deg)'},{transform:`rotate(${dir>0?-110:110}deg)`}],{duration:220*FXS(),fill:'forwards'});SND.sfx('door');
+  await sleep(250);
   if(escape){
-    await all(sprA(c.s,[{transform:'none'},{transform:'translateY(-30px) scale(.8)',offset:.4},{transform:`translate(${dir*44}px,16px) scale(.15)`,opacity:0}],520),word('¡AL MALETERO!',up(c.a,70),{color:'#ffd36b',size:20,d:800}));
+    await all(sprA(c.s,[{transform:'none'},{transform:'translateY(-44px) scale(.85) rotate(-10deg)',offset:.45},{transform:`translate(${dir*58}px,12px) scale(.12)`,opacity:0}],600),word('¡HOP!',up(c.a,80),{color:'#ffd36b',size:22,d:700}));
     $('#sp'+c.s).style.opacity='0';
+    lid.animate([{transform:`rotate(${dir>0?-110:110}deg)`},{transform:'rotate(0deg)'}],{duration:150*FXS(),fill:'forwards'});SND.sfx('thud');
+    word('¡PLAM!',P(at.x,y-50),{color:'#ff7a7a',size:20,d:600});await sleep(350);
+    // señal de Waterloo y cartel de "vuelvo enseguida"
+    const sx=c.s===0?W-70:70,sign=mk('<div style="background:#1a4fb3;color:#fff;border:3px solid #fff;outline:2px solid #1a4fb3;border-radius:6px;padding:5px 9px;font:800 13px/1 system-ui;white-space:nowrap">WATERLOO '+(dir>0?'→':'←')+'</div>',13);
+    const sy=c.s===1?c.a.y+78:c.a.y-120;sign.animate([{transform:T(P(sx,sy),.2,0),opacity:0},{transform:T(P(sx,sy),1,0),opacity:1}],{duration:250*FXS(),fill:'forwards'});
     SND.sfx('engine');
-    await all(car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+80:-80,y),1,0)}],{duration:700*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}),rain('💨',P(at.x,y),{n:6,size:22,spread:80,h:6,stagger:50,d:600}),word('BRRRUM',P(W/2,y-40),{size:22,d:700,delay:150}));
+    const card=mk('<div style="background:#c9a26b;color:#3a2206;border:3px solid #6b4a22;border-radius:4px;padding:6px 8px;font:900 13px/1.1 system-ui;text-align:center;box-shadow:3px 4px 0 #0006">VUELVO<br>ENSEGUIDA</div>',13);
+    card.animate([{transform:T(P(c.a.x,c.a.y+6),.3,0),opacity:0},{transform:T(P(c.a.x,c.a.y+6),1,-4),opacity:1}],{duration:250*FXS(),fill:'forwards'});
+    await all(car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+90:-90,y),1,0)}],{duration:800*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}),
+      rain('💨',P(at.x,y+8),{n:6,size:22,spread:90,h:6,stagger:50,d:600}),word('BRRRUM',P(W/2,y-30),{size:22,d:800,delay:150}));
+    // el golpe le da al cartel
+    await sleep(150);SND.sfx('slap');shake(250,5);
+    await all(word('¡ZAS!',P(c.a.x,c.a.y-40),{color:'#fff',size:24,d:600}),card.animate([{transform:T(P(c.a.x,c.a.y+6),1,-4)},{transform:T(P(c.a.x+dir*-20,c.a.y+30),1,dir*-80)}],{duration:500*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}));
+    await sleep(400);
   }else{
-    await all(pop('🗳️',up(at,40),{size:34,d:900}),word('LLENO DE URNAS',up(at,80),{color:'#ff7a7a',size:16,d:1000}));
-    await car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+80:-80,y),1,0)}],{duration:600*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{});
+    SND.sfx('pops');
+    await all(rain('🗳️',P(at.x,y-10),{n:7,size:26,spread:70,h:-30,stagger:50,d:700}),word('¡NO CABE!',up(at,70),{color:'#ff7a7a',size:22,d:1000}),word('lleno de urnas',up(at,40),{color:'#fff',size:14,d:1000,delay:150}));
+    lid.animate([{transform:`rotate(${dir>0?-110:110}deg)`},{transform:'rotate(0deg)'}],{duration:150*FXS(),fill:'forwards'});
+    await car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+90:-90,y),1,0)}],{duration:600*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{});
+    await sprA(c.s,[{transform:'none'},{transform:'rotate(-6deg) translateY(4px)'},{transform:'none'}],500);
   }
 }
 async function trunkEscape(s){
   const m=active(s);
+  await abilityBanner(s,'MALETERO',`${m.name} no piensa dar la cara`);
   await fxRun(c=>fxTrunk(c,true),s);
   spriteOut(s);$('#sp'+s).style.opacity='';
-  await say(`¡${m.name} se escapa en un maletero!`,'🚗 El golpe da en el hueco vacío.');
+  await say(`¡${m.name} huye en un maletero rumbo a Waterloo!`,'🚗 El golpe solo le da a un cartel de «Vuelvo enseguida».');
+  await say('Alguien tendrá que dar la cara por él…');
   const idx=s===0?await askSwitch(true):aiReplace();
   await doSwitch(s,idx,true);
 }

@@ -158,13 +158,16 @@ async function attack(s,mv,id){
     const vetoed=Math.random()<mv.veto;await fxRun(c=>fxVote(c,vetoed),s);
     if(vetoed){await say('¡El Congreso la tumba!','Habrá que volver a registrarla.');return;}
   }
+  let pre=null;
+  if(t.p.ability==='maletero'&&!t.trunkUsed&&!(t.vol.sub>0)){const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);const roll=.85+Math.random()*.15;pre={crit,roll};
+    if(calcDamage(u,t,mv,crit,roll)>=t.hp){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){await trunkEscape(1-s);return;}await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`No cabe nadie más: ${t.name} tiene que dar la cara.`);}}
   await playFX(id,s);
   const n=mv.multi===2?3+rnd(4):mv.multi?(r=>r<.35?2:r<.7?3:r<.85?4:5)(Math.random()):1;
   let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false,escaped=false;
   for(let i=0;i<n;i++){
     if(t.hp<=0)break;
-    const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);
-    let dmg=calcDamage(u,t,mv,crit,.85+Math.random()*.15);
+    const crit=i===0&&pre?pre.crit:(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);
+    let dmg=calcDamage(u,t,mv,crit,i===0&&pre?pre.roll:.85+Math.random()*.15);
     if(mv.multi&&PERHIT[id])fxRun(PERHIT[id],s);
     if(t.vol.sub>0&&!mv.sound){
       hitSub=true;SND.sfx('build');const d=Math.min(dmg,t.vol.sub);t.vol.sub-=d;total+=d;flash(1-s);
@@ -172,7 +175,7 @@ async function attack(s,mv,id){
     }else{
       if(t.vol.cap>0&&dmg>Math.floor(t.max/4)){dmg=Math.floor(t.max/4);capped=true;}
       if(t.p.ability==='jarron'&&!t.vased&&dmg>=t.hp){dmg=t.hp-1;vaseNow=true;}
-      if(t.p.ability==='maletero'&&!t.trunkUsed&&dmg>=t.hp&&t.hp>0){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){escaped=true;break;}await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`${t.name} se ha quedado sin maletero.`);}
+      if(t.p.ability==='maletero'&&!t.trunkUsed&&dmg>=t.hp&&t.hp>0){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){escaped=true;break;}await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`No cabe nadie más: ${t.name} tiene que dar la cara.`);}
       SND.hit(mv.cat==='P',eff(mv.type,t.types),crit);
       const d=Math.min(dmg,t.hp);hurt(t,d);total+=d;u.dealtTot=(u.dealtTot||0)+d;t.vol.lastHitType=mv.type;
       if(t.vol.otan)t.vol.otanHit=(t.vol.otanHit||0)+d;
@@ -319,7 +322,7 @@ async function doSwitch(s,idx,afterFaint){
   if(old.p.id==='abascal')B.sides[s].publico=0;
   resetVol(old);
   B.act[s]=idx;const n=active(s);resetVol(n);setSprite(s);SND.cry(n.p.id);if(n.p.legend)await legendIntro(s);updateMusic();
-  await say(s===0?`¡Adelante, ${n.name}!`:`El rival saca a ${n.name}.`,null,{bub:{s,m:n,line:n.p.entry}});
+  await say(s===0?`¡Adelante, ${n.name}!`:`El rival saca a ${n.name}.`,null,{bub:{s,m:n,line:n.trunkUsed&&n.p.id==='puigdemont'?'¡He vuelto! …de momento.':n.p.entry}});
   if(B.sides[s].caganer){const d=Math.max(1,Math.floor(n.max/8));hurt(n,d);flash(s);await say(`¡${label(n)} pisa el caganer!`,`Pierde ${d} PS.`);}
   if(n.hp>0){await onEntry(s);await checkRivalry();}
 }

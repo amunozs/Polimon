@@ -79,6 +79,7 @@ const SND=(()=>{
       const bar=[['E3',['E4','G4','B4']],['G3',['D5','B4','G4']],['A3',['C5','E5','A4']],['B3',['B4','Ds5','Fs4']],['D4',['D5','A4','Fs4']],['E3',['E5','B4','G4']]];
       let t=0;for(const[b,ch]of bar){tone({f:N[b],d:.5,type:'triangle',v:.35,t});ch.forEach((n,i)=>tone({f:N[n],d:.16,type:'square',v:.11,t:t+i*.17}));t+=.52;}
       tone({f:N.E4,d:.6,type:'square',v:.16,t});tone({f:N.E3,d:.6,type:'triangle',v:.35,t});},
+    screech:()=>{noise({d:.6,v:.45,f:2600,f2:1600,q:6});tone({f:1900,f2:1300,d:.55,type:'sawtooth',v:.08});},
     fanfare:()=>arp(['C5','E5','G5','C6','G5','C6'],{d:.14,v:.35,gap:.11}),
     sad:()=>{tone({f:392,f2:370,d:.3,type:'sawtooth',v:.25});tone({f:370,f2:349,d:.3,type:'sawtooth',v:.25,t:.32});tone({f:349,f2:262,d:.8,type:'sawtooth',v:.25,t:.64,vib:6});},
     cluck:()=>{for(let i=0;i<3;i++)tone({f:700,f2:500,d:.07,v:.3,t:i*.11});},
