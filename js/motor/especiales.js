@@ -214,18 +214,13 @@ async function fxTrunk(c,escape){
     $('#sp'+c.s).style.opacity='0';
     lid.animate([{transform:`rotate(${dir>0?-110:110}deg)`},{transform:'rotate(0deg)'}],{duration:150*FXS(),fill:'forwards'});SND.sfx('thud');
     word('¡PLAM!',P(at.x,y-50),{color:'#ff7a7a',size:20,d:600});await sleep(350);
-    // señal de Waterloo y cartel de "vuelvo enseguida"
+    // señal de Waterloo
     const sx=c.s===0?W-70:70,sign=mk('<div style="background:#1a4fb3;color:#fff;border:3px solid #fff;outline:2px solid #1a4fb3;border-radius:6px;padding:5px 9px;font:800 13px/1 system-ui;white-space:nowrap">WATERLOO '+(dir>0?'→':'←')+'</div>',13);
     const sy=c.s===1?c.a.y+78:c.a.y-120;sign.animate([{transform:T(P(sx,sy),.2,0),opacity:0},{transform:T(P(sx,sy),1,0),opacity:1}],{duration:250*FXS(),fill:'forwards'});
     SND.sfx('engine');
-    const card=mk('<div style="background:#c9a26b;color:#3a2206;border:3px solid #6b4a22;border-radius:4px;padding:6px 8px;font:900 13px/1.1 system-ui;text-align:center;box-shadow:3px 4px 0 #0006">VUELVO<br>ENSEGUIDA</div>',13);
-    card.animate([{transform:T(P(c.a.x,c.a.y+6),.3,0),opacity:0},{transform:T(P(c.a.x,c.a.y+6),1,-4),opacity:1}],{duration:250*FXS(),fill:'forwards'});
     await all(car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+90:-90,y),1,0)}],{duration:800*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}),
       rain('💨',P(at.x,y+8),{n:6,size:22,spread:90,h:6,stagger:50,d:600}),word('BRRRUM',P(W/2,y-30),{size:22,d:800,delay:150}));
-    // el golpe le da al cartel
-    await sleep(150);SND.sfx('slap');shake(250,5);
-    await all(word('¡ZAS!',P(c.a.x,c.a.y-40),{color:'#fff',size:24,d:600}),card.animate([{transform:T(P(c.a.x,c.a.y+6),1,-4)},{transform:T(P(c.a.x+dir*-20,c.a.y+30),1,dir*-80)}],{duration:500*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}));
-    await sleep(400);
+    await sleep(500);
   }else{
     SND.sfx('pops');
     await all(rain('🗳️',P(at.x,y-10),{n:7,size:26,spread:70,h:-30,stagger:50,d:700}),word('¡NO CABE!',up(at,70),{color:'#ff7a7a',size:22,d:1000}),word('lleno de urnas',up(at,40),{color:'#fff',size:14,d:1000,delay:150}));
@@ -234,13 +229,25 @@ async function fxTrunk(c,escape){
     await sprA(c.s,[{transform:'none'},{transform:'rotate(-6deg) translateY(4px)'},{transform:'none'}],500);
   }
 }
+async function koWarning(s){
+  SND.sfx('beat');
+  await fxRun(async c=>{
+    const pl=$('#plate'+s);if(pl)pl.animate([{boxShadow:'0 0 0 0 #e5333d00'},{boxShadow:'0 0 0 5px #e5333d'},{boxShadow:'0 0 0 0 #e5333d00'},{boxShadow:'0 0 0 5px #e5333d'},{boxShadow:'0 0 0 0 #e5333d00'}],{duration:1100*FXS()});
+    await all(pop('☠️',up(c.a,58),{size:44,d:1200}),word('¡ESTE GOLPE LE DEJA KO!',P($('#field').clientWidth/2,c.s===1?c.a.y+70:c.a.y-110),{color:'#ff5a5a',size:19,d:1300}),
+      sprA(c.s,[{transform:'none'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(-5px)'},{transform:'none'}],500));
+  },s);
+}
 async function trunkEscape(s){
   const m=active(s);
+  await koWarning(s);
+  await say(`¡Ese golpe deja KO a ${m.name}!`,'…pero tiene un plan.');
   await abilityBanner(s,'MALETERO',`${m.name} no piensa dar la cara`);
   await fxRun(c=>fxTrunk(c,true),s);
   spriteOut(s);$('#sp'+s).style.opacity='';
-  await say(`¡${m.name} huye en un maletero rumbo a Waterloo!`,'🚗 El golpe solo le da a un cartel de «Vuelvo enseguida».');
-  await say('Alguien tendrá que dar la cara por él…');
+  await say(`¡${m.name} huye en un maletero rumbo a Waterloo!`,'🚗 Se salva… y deja a otro dando la cara.');
   const idx=s===0?await askSwitch(true):aiReplace();
   await doSwitch(s,idx,true);
+  const n=active(s);
+  await fxRun(c=>all(word('¡TE TOCA!',up(c.a,80),{color:'#ff7a7a',size:22,d:900}),sprA(c.s,[{transform:'none'},{transform:'translateY(-8px) rotate(-6deg)'},{transform:'rotate(6deg)'},{transform:'none'}],600)),s);
+  await say(`¡${n.name} da la cara por ${m.name}… y se come el golpe!`);
 }

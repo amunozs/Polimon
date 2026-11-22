@@ -136,14 +136,14 @@ async function execMove(s,id,forced){
   return attack(s,mv,id);
 }
 async function attack(s,mv,id){
-  const u=active(s),t=active(1-s);
+  const u=active(s);let t=active(1-s);
   if(t.hp<=0){await say('¡Pero no hay nadie enfrente!');return;}
   if(mv.breaks){const br=[];if(t.vol.protect){delete t.vol.protect;br.push('la protección');}if(t.vol.sub>0){delete t.vol.sub;br.push('el chalet');}if(t.vol.otan){t.vol.otan=false;delete t.vol.otanHit;br.push('el escudo de la OTAN');}if(br.length){renderPlates();SND.sfx('slap');await say(`¡La falç siega ${br.join(' y ')} de ${label(t)}!`);}}
   if(t.vol.protect){await say(`¡${label(t)} se ha protegido!`);return;}
   if(isAway(t)){await say(`¡${label(t)} está de gira! No hay nadie a quien atacar.`);return;}
   if(t.vol.vase>0){SND.sfx('lock');await say('El jarrón chino aguanta el golpe.','Tiene mucho valor, pero nadie sabe dónde ponerlo.');return;}
   if(!accuracyOK(s,mv)){await fxRun(fxMiss,s);await say('¡El argumento no ha llegado!');return;}
-  const e=eff(mv.type,t.types);
+  let e=eff(mv.type,t.types);
   if(e===0){await say(`No le afecta a ${label(t)}. Ni se inmuta.`);return;}
   if(mv.coin){
     const heads=Math.random()<.5;await fxRun(c=>fxCoin(c,heads),s);
@@ -160,7 +160,7 @@ async function attack(s,mv,id){
   }
   let pre=null;
   if(t.p.ability==='maletero'&&!t.trunkUsed&&!(t.vol.sub>0)){const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);const roll=.85+Math.random()*.15;pre={crit,roll};
-    if(calcDamage(u,t,mv,crit,roll)>=t.hp){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){await trunkEscape(1-s);return;}await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`No cabe nadie más: ${t.name} tiene que dar la cara.`);}}
+    if(calcDamage(u,t,mv,crit,roll)>=t.hp){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){await trunkEscape(1-s);if(B.over)return;t=active(1-s);e=eff(mv.type,t.types);pre=null;}else{await koWarning(1-s);await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`No cabe nadie más: ${t.name} tiene que dar la cara.`);}}}
   await playFX(id,s);
   const n=mv.multi===2?3+rnd(4):mv.multi?(r=>r<.35?2:r<.7?3:r<.85?4:5)(Math.random()):1;
   let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false,escaped=false;
@@ -185,7 +185,7 @@ async function attack(s,mv,id){
     if(crit)anyCrit=true;landed++;renderPlates();
     if(mv.multi)await pause(330);
   }
-  if(escaped){await trunkEscape(1-s);return;}
+  if(escaped){await trunkEscape(1-s);if(B.over)return;return attack(s,mv,id);}
   if(!mv.multi)await pause(650);
   if(hitSub&&!mv.multi&&t.vol.sub>0)await say('¡El chalet recibe el golpe!');
   if(mv.multi)await say(id==='votos'?`¡${landed} lluvias de papeletas! ¡${(landed*1700000).toLocaleString('es-ES')} votos!`:`¡${landed} ${id==='impresora'?'folios':'urnas'} seguidos!`);
