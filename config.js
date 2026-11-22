@@ -18,8 +18,8 @@ const CONFIG = {
   // codigo: el nombre de tu cuenta (https://<codigo>.goatcounter.com). Solo cuenta en el dominio indicado,
   // así que preproducción y las pruebas en tu ordenador no ensucian los datos.
   analitica: {
-    activo: false,
-    codigo: '',
+    activo: true,
+    codigo: 'amunozs',
     dominio: 'amunozs.github.io'
   },
 
