@@ -119,7 +119,7 @@ function askSwitch(forced){
     const list=B.teams[0].map((m,i)=>{const dis=m.hp<=0||i===B.act[0];
       return `<button class="swi" type="button" data-i="${i}" ${dis?'disabled':''}>
         ${avs(m.p)}
-        <div class="grow"><b>${esc(m.name)}</b> <span style="font-size:12px;color:#6c6577">${m.hp}/${m.max} PS${i===B.act[0]&&m.hp>0?' · en combate':''}${m.status?' · '+STLBL[m.status][0].toLowerCase():''}</span>
+        <div class="grow"><b>${esc(m.name)}</b> <span style="font-size:12px;color:#6c6577">${m.fled?'🚗 Huido a Waterloo':`${m.hp}/${m.max} PS`}${i===B.act[0]&&m.hp>0?' · en combate':''}${m.status?' · '+STLBL[m.status][0].toLowerCase():''}</span>
         <div class="hp${hpCls(m)}"><i style="width:${(m.hp/m.max*100).toFixed(1)}%"></i></div></div></button>`;}).join('');
     $('#controls').className='controls';
     $('#controls').innerHTML=`<div class="swl"><h3>${forced?'¿A quién sacas ahora?':'¿A quién sacas?'}</h3>${B.sides[0].caganer?'<div class="dzhint">💩 Ojo: hay un caganer. Quien entre perderá algo de vida.</div>':''}${list}${forced?'':'<button class="btn ghost" type="button" id="swBack">Volver</button>'}</div>`;

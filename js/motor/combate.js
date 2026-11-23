@@ -159,7 +159,7 @@ async function attack(s,mv,id){
   }
   let pre=null;
   if(t.p.ability==='maletero'&&!t.trunkUsed&&!(t.vol.sub>0)){const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);const roll=.85+Math.random()*.15;pre={crit,roll};
-    if(calcDamage(u,t,mv,crit,roll)>=t.hp){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){await trunkEscape(1-s);if(B.over)return;t=active(1-s);e=eff(mv.type,t.types);pre=null;}else{await koWarning(1-s);await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`No cabe nadie más: ${t.name} tiene que dar la cara.`);}}}
+    if(calcDamage(u,t,mv,crit,roll)>=t.hp){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){await trunkEscape(1-s);if(B.over)return;t=active(1-s);e=eff(mv.type,t.types);pre=null;}else{await koWarning(1-s);await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('¡La policía para el coche antes de que arranque!',`Ya no le queda nadie que dé la cara por él: a ${t.name} le toca aguantar el golpe.`);}}}
   await playFX(id,s);
   const n=mv.multi===2?3+rnd(4):mv.multi?(r=>r<.35?2:r<.7?3:r<.85?4:5)(Math.random()):1;
   let total=0,hitSub=false,anyCrit=false,landed=0,capped=false,vaseNow=false,escaped=false;
@@ -174,7 +174,7 @@ async function attack(s,mv,id){
     }else{
       if(t.vol.cap>0&&dmg>Math.floor(t.max/4)){dmg=Math.floor(t.max/4);capped=true;}
       if(t.p.ability==='jarron'&&!t.vased&&dmg>=t.hp){dmg=t.hp-1;vaseNow=true;}
-      if(t.p.ability==='maletero'&&!t.trunkUsed&&dmg>=t.hp&&t.hp>0){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){escaped=true;break;}await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('Llega el coche… ¡pero el maletero está lleno de urnas!',`No cabe nadie más: ${t.name} tiene que dar la cara.`);}
+      if(t.p.ability==='maletero'&&!t.trunkUsed&&dmg>=t.hp&&t.hp>0){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){escaped=true;break;}await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('¡La policía para el coche antes de que arranque!',`Ya no le queda nadie que dé la cara por él: a ${t.name} le toca aguantar el golpe.`);}
       SND.hit(mv.cat==='P',eff(mv.type,t.types),crit);
       const d=Math.min(dmg,t.hp);hurt(t,d);total+=d;u.dealtTot=(u.dealtTot||0)+d;t.vol.lastHitType=mv.type;
       if(t.vol.otan)t.vol.otanHit=(t.vol.otanHit||0)+d;
@@ -321,7 +321,7 @@ async function doSwitch(s,idx,afterFaint){
   if(old.p.id==='abascal')B.sides[s].publico=0;
   resetVol(old);
   B.act[s]=idx;const n=active(s);resetVol(n);setSprite(s);SND.cry(n.p.id);if(n.p.legend)await legendIntro(s);updateMusic();
-  await say(s===0?`¡Adelante, ${n.name}!`:`El rival saca a ${n.name}.`,null,{bub:{s,m:n,line:n.trunkUsed&&n.p.id==='puigdemont'?'¡He vuelto! …de momento.':n.p.entry}});
+  await say(s===0?`¡Adelante, ${n.name}!`:`El rival saca a ${n.name}.`,null,{bub:{s,m:n,line:n.p.entry}});
   if(B.sides[s].caganer){const d=Math.max(1,Math.floor(n.max/8));hurt(n,d);flash(s);await say(`¡${label(n)} pisa el caganer!`,`Pierde ${d} PS.`);}
   if(n.hp>0){await onEntry(s);await checkRivalry();}
 }
