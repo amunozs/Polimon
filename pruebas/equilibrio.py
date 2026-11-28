@@ -5,7 +5,7 @@ JUEGO=(pathlib.Path(__file__).resolve().parent.parent/'index.html').as_uri()
 from playwright.async_api import async_playwright
 N=int(sys.argv[1]) if len(sys.argv)>1 else 300
 JS="""async(GAMES)=>{
-  SPEED=0;
+  SPEED=0; CONFIG.rival='listo'; // el equilibrio se mide con el rival que calcula
   const swap=()=>{B.teams.reverse();B.act.reverse();B.sides.reverse();};
   getPlayerAction=function(){swap(); const a=aiChoose(); swap(); return Promise.resolve(a);};
   askSwitch=function(){swap(); const i=aiReplace(); swap(); return Promise.resolve(i);};

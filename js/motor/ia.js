@@ -1,7 +1,39 @@
 'use strict';
 /* =====================================================================
    IA DEL RIVAL: cómo elige ataque y a quién saca.
+   Hay dos rivales y se elige en config.js → rival:
+   - 'facil': ataca al azar (sin hacer tonterías evidentes), nunca cambia
+     de polímon por gusto y, si le eliminan uno, saca otro al azar.
+   - 'listo': el rival de siempre, que calcula daños y cambia cuando le conviene.
    ===================================================================== */
+
+function aiChoose(){return CONFIG.rival==='listo'?aiChooseListo():aiChooseFacil();}
+function aiReplace(){return CONFIG.rival==='listo'?aiReplaceListo():aiReplaceFacil();}
+
+// ¿Este ataque sería una tontería evidente? (no afecta al rival o cura con la vida llena)
+function absurdo(me,foe,mv){
+  if(mv.cat!=='X')return eff(mv.type,foe.types)===0;
+  const k=mv.eff&&mv.eff.kind;
+  const llena=me.hp>=me.max;
+  if(k==='heal'||k==='peugeot')return llena;
+  if(k==='rescate')return llena&&!B.teams[1].some(m=>m.hp<=0);
+  return false;
+}
+function aiChooseFacil(){
+  const me=active(1),foe=active(0);
+  if(isAway(me))return{type:'move',away:true};
+  if(me.vol.vase>0)return{type:'move',vase:true};
+  if(me.vol.charging)return{type:'move',forced:true};
+  const usable=me.moves.map((x,i)=>({...x,i})).filter(x=>x.pp>0);
+  if(!usable.length)return{type:'move',struggle:true};
+  const sensatos=usable.filter(x=>!absurdo(me,foe,MOVES[x.id]));
+  const lista=sensatos.length?sensatos:usable;
+  return{type:'move',idx:lista[rnd(lista.length)].i};
+}
+function aiReplaceFacil(){
+  const vivos=B.teams[1].map((m,i)=>({m,i})).filter(x=>x.m.hp>0);
+  return vivos[rnd(vivos.length)].i;
+}
 
 function estDmg(u,t,id){
   const mv=MOVES[id];if(!mv||mv.cat==='X')return 0;
@@ -16,7 +48,7 @@ function estDmg(u,t,id){
   return Math.max(0,d*(mv.acc?mv.acc/100:1));
 }
 function bestPct(u,t){let b=0;for(const x of u.moves)if(x.pp>0)b=Math.max(b,estDmg(u,t,x.id));return b/t.max;}
-function aiChoose(){
+function aiChooseListo(){
   const me=active(1),foe=active(0);
   if(isAway(me))return{type:'move',away:true};
   if(me.vol.vase>0)return{type:'move',vase:true};
@@ -71,7 +103,7 @@ function aiChoose(){
   }
   return{type:'move',idx:pick};
 }
-function aiReplace(){
+function aiReplaceListo(){
   const foe=active(0);let best=-1,bs=-1e9;
   B.teams[1].forEach((m,i)=>{if(m.hp<=0)return;const sc=bestPct(m,foe)-.7*bestPct(foe,m)+Math.random()*.1;if(sc>bs){bs=sc;best=i;}});
   return best;
