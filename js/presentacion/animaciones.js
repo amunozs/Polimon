@@ -179,8 +179,45 @@ const FX={
   peugeot:async c=>{const dir=c.s===0?-1:1;await all(pop('🔑',up(c.a,50),{size:30,d:500}),glow(c.s,'#ffd27a',500));await sprA(c.s,[{opacity:1,transform:'none'},{opacity:0,transform:'scale(.6)'}],350);$('#sp'+c.s).classList.add('gone');await all(fly('🚗',P(c.a.x,c.a.y+30),P(c.a.x+dir*320,c.a.y+30),{d:900,size:42,ease:'ease-in'}),burst('💨',P(c.a.x,c.a.y+36),{n:5,r:30}));},
   peugeotBack:async c=>{const dir=c.s===0?-1:1;await fly('🚗',P(c.a.x+dir*320,c.a.y+30),P(c.a.x,c.a.y+30),{d:800,size:42,ease:'ease-out'});$('#sp'+c.s).classList.remove('gone');await all(sprA(c.s,[{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'none'}],350),rise(['✨','💚'],c.a,{n:7}),word('¡HE VUELTO!',up(c.a,62),{size:22}));},
   dondedije:async c=>{await all(sprA(c.s,[{transform:'none'},{transform:'rotateY(180deg)'},{transform:'rotateY(360deg)'}],700),word('¿Dije?',up(c.a,58),{size:24,d:800}),tint(c.s,'hue-rotate(160deg) saturate(1.6)',900));},
-  tezanazo:[async c=>{await word('CIS: 99%',up(c.b,70),{color:'#e5533d',size:26,d:700});await all(fly('📊',P(c.b.x,c.b.y-180),c.b,{d:420,size:58,ease:'ease-in'}));await all(shake(400,10),burst('📈',c.b,{n:6,size:22}));},
-    async c=>{await word('CIS: 104%',up(c.b,70),{color:'#e5533d',size:26,d:800});await fly('🥧',c.a,c.b,{d:480,size:46,arc:70,spin:360,ease:'ease-in'});SND.sfx('slap');await all(shake(400,10),rain('🥧',c.b,{n:4,size:18,h:40,spread:60}),word('¡ZAS, EN TODA LA ENCUESTA!',up(c.b,24),{size:14,d:900}));}],
+  tezanazo:async c=>{ // La cocina del CIS: la encuesta se cocina en directo y le cae encima
+    const f=$('#field'),W=f.clientWidth,H=f.clientHeight,dir=c.b.x>c.a.x?1:-1,fr=f.getBoundingClientRect();
+    const riv=active(c.t),yo=active(c.s),at=P(W/2,H*.5);
+    const pn=document.createElement('div');pn.className='cis';
+    pn.innerHTML=`<div class="cish">ENCUESTA CIS<small>Estimación de voto</small></div><div class="cisg"><div class="cisb"><b></b><i style="background:${TYPES[riv.types[0]].c}"></i><span>${esc(riv.name)}</span></div><div class="cisb s"><b></b><i></i><span>${esc(yo.name)}</span></div></div>`;
+    pn.style.transform=T(P(at.x+dir*W,at.y));$('#fx').appendChild(pn);
+    const [br,bs]=[...pn.querySelectorAll('.cisb')];
+    const set=(bar,v)=>{const h=Math.max(2,v*.9);bar.querySelector('i').style.height=h+'px';bar.querySelector('b').style.bottom=(h+3)+'px';bar.querySelector('b').textContent=Math.round(v)+'%';};
+    set(br,31);set(bs,29);
+    SND.sfx('news');
+    await anim(pn,[{transform:T(P(at.x+dir*W,at.y),.8,8),opacity:0},{transform:T(at,1,-2),opacity:1}],420,{ease:'cubic-bezier(.2,1.3,.5,1)'});
+    // la cocina
+    const ch=P(Math.max(34,at.x-132),at.y+40);
+    pop('👨‍🍳',ch,{size:46,d:2300});pop('🍲',P(ch.x+2,ch.y+36),{size:32,d:2300});
+    rise('♨️',P(ch.x+2,ch.y+22),{n:6,size:18,spread:26,d:900,stagger:170});
+    fly('🧂',P(ch.x+26,ch.y-34),P(ch.x+10,ch.y+16),{d:520,size:22,arc:24,spin:-70,delay:300});
+    await sleep(750);
+    // la barra se dispara y rompe el gráfico
+    let v=29,cr=false;
+    for(let k=1;k<=36;k++){const t=k/36;v=29+(232-29)*t*t;set(bs,v);set(br,31-28*t);
+      if(k%3===0)SND.sfx('blipbeep');
+      if(v>115&&!cr){cr=true;const pr=pn.getBoundingClientRect(),rb=bs.getBoundingClientRect();SND.sfx('crit');shake(260,6);burst(['💥','🧱'],P(rb.left-fr.left+rb.width/2,pr.top-fr.top),{n:6,r:44,size:20,d:600});}
+      await sleep(32);}
+    await sleep(160);
+    SND.sfx('whoosh');
+    await all(anim(bs.querySelector('i'),[{transform:'none'},{transform:'translateY(-520px)'}],300,{ease:'ease-in'}),anim(pn,[{opacity:1},{opacity:0,offset:1}],420,{delay:120}));
+    // y le cae encima
+    const drop=document.createElement('div');drop.className='cisdrop';drop.innerHTML=`<b>${Math.round(v)}%</b>`;$('#fx').appendChild(drop);
+    const land=P(c.b.x,c.b.y-64);
+    await anim(drop,[{transform:T(P(c.b.x,-170))},{transform:T(land)}],320,{ease:'ease-in'});
+    SND.sfx('pow');SND.sfx('thud');
+    const sp=$('#sp'+c.t);sp.style.transformOrigin='50% 100%';
+    await all(shake(650,16),flashScr('#ffffff',260),
+      sprA(c.t,[{transform:'none'},{transform:'scale(1.3,.5)',offset:.2},{transform:'scale(.92,1.1)',offset:.6},{transform:'none'}],800),
+      anim(drop,[{transform:T(land)},{transform:T(land,1,0),offset:.45},{transform:T(P(c.b.x+dir*50,c.b.y+16),1,dir*85),opacity:0}],950,{ease:'ease-in',delay:120}),
+      burst('💨',P(c.b.x,c.b.y+38),{n:8,r:72,size:26,d:750}),
+      stamp('CIS',clampX(up(c.b,72),70),{d:1100,delay:250}));
+    sp.style.transformOrigin='';
+  },
   falcon:async c=>{await all(fly('✈️',c.a,c.b,{arc:110,size:42,d:800,spin:25}),lunge(c,{dist:20,d:300}),cam(c,{z:1.08,d:700}));shake(500,10);await all(burst(['💥','🔥','💨'],c.b,{n:8,size:28}),flashScr('#ffd27a',300));},
   derogar:async c=>{
     await all(zigzag(c.a,c.b,{w:5,d:450}),beam(c.a,c.b,{color:'#ffe066',w:10,d:450}));
