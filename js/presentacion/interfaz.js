@@ -103,7 +103,7 @@ function showMoves(){
     const pw=mv.cat==='X'?'Estado':mv.multi?`Pot ${mv.power}×${mv.multi===2?'3-6':'2-5'}`:'Pot '+(mv.eruption?Math.max(1,Math.floor(mv.power*m.hp/m.max)):mv.power);
     return `<button class="move${m.pana?' f82':''}" type="button" data-i="${i}" style="--tc:${TYPES[mv.type].c}" ${x.pp<=0?'disabled':''}>
       ${et?`<span class="ef${e<1?' bad':''}">${et}</span>`:''}<b>${esc(dk?slur(mv.name,true):mv.name)}</b>
-      <small>${TYPES[mv.type].e} ${pw} · PP ${shown.pp}/${mv.pp}</small></button>`;}).join('')
+      <small>${shown.cut?'✂️ Recortado':`${TYPES[mv.type].e} ${pw} · PP ${shown.pp}/${mv.pp}`}</small></button>`;}).join('')
     :`<button class="move" type="button" data-struggle="1" style="--tc:#c3bcb1;grid-column:1/-1"><b>Pataleta</b><small>Sin PP: patalea y se hace daño</small></button>`;
   const trapped=B.sides[0].obras>0;
   const canSwitch=!trapped&&B.teams[0].some((x,i)=>i!==B.act[0]&&x.hp>0);

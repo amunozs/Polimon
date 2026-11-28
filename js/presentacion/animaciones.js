@@ -100,9 +100,12 @@ async function fxGestion(c,i){
   SND.sfx('thud');shake(300,6);
   await anim(fo.querySelector('.glab.r'),[{transform:'scale(1)'},{transform:'scale(1.3) rotate(-3deg)',offset:.4},{transform:'scale(1) rotate(-3deg)'}],420);
   await sleep(500);
-  // la carpeta se abre: dentro solo hay unas tijeras
-  const sc=up(at,8);
-  await all(anim(fo,[{transform:T(at,1)},{transform:T(at,1.05,-4),offset:.4},{transform:T(at,.3,14),opacity:0}],420),pop('✂️',sc,{size:64,d:520}));
+  // la carpeta se abre: dentro solo hay unas tijeras… y la verdad
+  const sc=P(at.x,H*.6),tp=P(W/2,H*.3);
+  SND.sfx('superE');
+  const msg=pop('<span class="fxw gtruth">¡La gestión son,<br>en realidad,<br>RECORTES!</span>',tp,{size:26,d:2600,rot:-4});
+  await all(anim(fo,[{transform:T(at,1)},{transform:T(at,1.05,-4),offset:.4},{transform:T(at,.3,14),opacity:0}],420),pop('✂️',sc,{size:70,d:700}),shake(400,8));
+  await sleep(500);
   if(i===0){ // Sanidad: le cortan un trozo de la barra de vida
     const bar=$('#plate'+c.t+' .hp'),fill=bar&&bar.querySelector('i');
     if(!fill)return;
@@ -113,9 +116,10 @@ async function fxGestion(c,i){
     const ch=document.createElement('div');ch.className='gchunk';Object.assign(ch.style,{left:x0+'px',top:(ir.top-fr.top)+'px',width:cw+'px',height:ir.height+'px',background:getComputedStyle(fill).backgroundColor||'#3fb950'});
     $('#fx').appendChild(ch);fill.style.width=Math.max(0,(ir.width-cw)/br.width*100)+'%';
     await all(pop('✂️',P(x0,y-4),{size:34,d:420}),anim(ch,[{transform:'none',opacity:1},{transform:'translate(6px,-8px) rotate(-8deg)',opacity:1,offset:.2},{transform:'translate(26px,150px) rotate(70deg)',opacity:0}],1000,{ease:'ease-in'}),burst('✨',P(x0,y),{n:5,r:26,size:16,d:500}));
-  }else if(i===1){ // Educación: le cortan el discurso por la mitad
-    const bp=clampX(P(c.b.x-10,c.b.y+58),80);
-    const [L,R]=partido('<span class="gbub">bla, bla, bla…</span>',bp,15);
+  }else if(i===1){ // Educación: le recortan un ataque
+    if(!c.mv){await msg;return;}
+    const bp=clampX(P(c.b.x-10,c.b.y+62),115),tt=TYPES[c.mv.type];
+    const [L,R]=partido(`<span class="gcard" style="--tc:${tt.c}"><b>${esc(c.mv.name)}</b><small>${tt.e} ${tt.n}</small></span>`,bp,15);
     await all(anim(L,[{opacity:0,transform:T(bp,.4)},{opacity:1,transform:T(bp,1)}],260),anim(R,[{opacity:0,transform:T(bp,.4)},{opacity:1,transform:T(bp,1)}],260));
     SND.sfx('whoosh');await fly('✂️',sc,up(bp,40),{d:420,size:40,spin:-180});
     SND.sfx('snip');
@@ -132,8 +136,11 @@ async function fxGestion(c,i){
     await all(fly('✂️',up(hp,56),P(hp.x,hp.y+50),{d:240,size:42,ease:'linear'}),
       anim(L,[{transform:T(hp)},{transform:T(P(hp.x-40,hp.y+16),1,-28),offset:.5},{transform:T(P(hp.x-56,hp.y+70),1,-60),opacity:0}],1000,{delay:160}),
       anim(R,[{transform:T(hp)},{transform:T(P(hp.x+40,hp.y+16),1,28),offset:.5},{transform:T(P(hp.x+56,hp.y+70),1,60),opacity:0}],1000,{delay:160}),
-      burst('🪙',hp,{n:9,r:80,size:22,d:900,delay:200}),rain('🪙',P(hp.x,hp.y+30),{n:6,spread:70,h:10,size:18,stagger:60,d:700,delay:300}));
+      ...Array.from({length:10},(_,k)=>fly('🪙',P(hp.x+(Math.random()-.5)*40,hp.y),P(c.a.x+(Math.random()-.5)*50,c.a.y+(Math.random()-.5)*30),{d:650,size:22,arc:60+Math.random()*60,spin:360,delay:200+k*70,ease:'ease-in-out'})));
+    SND.sfx('coins');
+    await all(glow(c.s,'#ffd84d',900),burst('🪙',c.a,{n:7,r:50,size:18,d:700}),rise('✨',c.a,{n:5,size:18}));
   }
+  await msg;
 }
 
 /* ---- Piezas de la Flotilla a Gaza: mar, barcos y prensa ---- */
