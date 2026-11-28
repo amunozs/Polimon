@@ -89,7 +89,7 @@ const MOVES = {
     cat: 'X',
     pp: 10,
     eff: {kind:'gestion'},
-    desc: 'Elige qué gestionar: Sanidad (le quita 1/4 de la vida al rival), Educación (le baja mucho el Ataque Esp.) o Pensiones (le baja mucho el Ataque).',
+    desc: 'Elige qué gestionar: Sanidad (le quita 1/4 de la vida al rival), Educación (le quita un ataque al azar para todo el combate) o Pensiones (se queda la hucha y se cura 1/4 de su vida).',
     quip: '«Esto es gestión.»'
   },
 

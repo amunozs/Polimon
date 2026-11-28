@@ -267,17 +267,19 @@ async function trunkEscape(s){
 const GESTION=[
   {id:'sanidad',  n:'Sanidad',   ico:'🏥'},
   {id:'educacion',n:'Educación', ico:'🎓'},
-  {id:'pensiones',n:'Pensiones', ico:'🐷'}
+  {id:'pensiones',n:'Pensiones', ico:'👵'}
 ];
 // Cómo elige la máquina (y las pruebas automáticas)
 function gestionIA(s){
-  const foe=active(1-s);
+  const me=active(s),foe=active(1-s);
   if(s===1&&CONFIG.rival!=='listo')return rnd(3);
   if(foe.hp<=Math.floor(foe.max/4))return 0;
-  if(foe.st.atk>=foe.st.spa&&foe.stages.atk>-4)return 2;
-  if(foe.stages.spa>-4)return 1;
+  if(me.hp<=me.max/2)return 2;
+  if(recortables(foe).length&&Math.random()<.4)return 1;
   return 0;
 }
+// Ataques que se le pueden recortar (nunca el último que le quede)
+function recortables(m){const u=m.moves.filter(x=>x.pp>0);return u.length>1?u:[];}
 // El jugador elige carpeta en los botones de abajo
 function elegirGestion(s){
   if(s!==0||SPEED===0)return Promise.resolve(gestionIA(s));
@@ -292,13 +294,19 @@ async function gestion(s){
   const u=active(s),t=active(1-s);
   const i=await elegirGestion(s);const g=GESTION[i];
   const d=i===0?Math.min(t.hp,Math.max(1,Math.floor(t.max/4))):0;
-  await fxRun(c=>fxGestion(c,i),s,{frac:d/t.max});
+  const rc=i===1?recortables(t):[];const slot=rc.length?rc[rnd(rc.length)]:null;
+  await fxRun(c=>fxGestion(c,i),s,{frac:d/t.max,mv:slot&&MOVES[slot.id]});
   if(i===0){
     hurt(t,d);if(t.hp<=0)B.lastKO={by:u,victim:t,move:'Gestión'};flash(1-s);renderPlates();
     await say(`Recorte en ${g.n}.`,`${label(t)} pierde ${d} PS.`);
     await resistCheck();
+  }else if(i===1){
+    if(!slot){await say(`Recorte en ${g.n}.`,`A ${label(t)} ya no le queda nada que recortar.`);return;}
+    slot.pp=0;slot.cut=true;
+    await say(`Recorte en ${g.n}.`,`${label(t)} se queda sin «${MOVES[slot.id].name}» para todo el combate.`);
   }else{
-    await say(`Recorte en ${g.n}.`,i===2?'Se vacía la hucha de las pensiones.':null);
-    await boost(t,i===1?{spa:-2}:{atk:-2},u);
+    if(u.hp>=u.max){await say(`Recorte en ${g.n}.`,`${label(u)} se queda la hucha… aunque ya tenía toda la vida.`);return;}
+    const h=Math.max(1,Math.floor(u.max/4));heal(u,h);SND.sfx('heal');renderPlates();
+    await say(`Recorte en ${g.n}.`,`${label(u)} se queda la hucha y recupera ${h} PS.`);
   }
 }

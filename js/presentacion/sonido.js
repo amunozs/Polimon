@@ -122,7 +122,7 @@ const SND=(()=>{
     felipe:()=>{tone({f:150,f2:130,d:.35,type:'sawtooth',v:.35});tone({f:300,d:.08,v:.25,t:.42});tone({f:330,d:.08,v:.25,t:.52});tone({f:300,d:.12,v:.25,t:.62});},
     colau:()=>{tone({f:320,f2:150,d:.2,type:'sine',v:.5,vib:12});tone({f:300,f2:140,d:.25,type:'sine',v:.5,vib:12,t:.22});}
   };
-  const MOVE={falcon:'jet',barco:'engine',peugeot:'engine',peugeotBack:'engine',zasca:'slap',tezanazo:'thud',lluvia:'rain',cana:'pop',publico:'applause',fruta:'pops',
+  const MOVE={falcon:'jet',barco:'engine',peugeot:'engine',peugeotBack:'engine',zasca:'slap',tezanazo:'news',lluvia:'rain',cana:'pop',publico:'applause',fruta:'pops',
     referendum:'thud',impresora:'printer',alcalde:'wobble',dondedije:'wobble',m360:'wobble',rescate:'coins',independencia:'fanfare',derechita:'cluck',huelga:'whistle',
     calderon:'chant',parlem:'chime',flotilla:'horn',desahucios:'megaphone',caganer:'prrt',maletero:'door',chalet:'build',purga:'gong',comunismo:'fire',verbena:'fireworks',
     obras:'drill',cambio:'whoosh',otan:'door',isidoro:'whoosh',rosa:'thud',giratoria:'door',ave:'jet',votos:'printer',hijo:'chant',plasma:'static',vecino:'zap',derogar:'zap',nisino:'zap',chiringuitos:'lock',captura:'camera',tuit3am:'tweet',escucha:'chime',sonrisa:'heal',
