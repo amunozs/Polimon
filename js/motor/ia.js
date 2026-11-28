@@ -42,6 +42,7 @@ function estDmg(u,t,id){
   if(mv.multi)d*=mv.multi===2?4.5:3.1;
   if(mv.coin)d=d*.5-(t.max/4)*.5;
   if(mv.veto)d*=1-mv.veto;
+  if(mv.intercept)d*=1-mv.intercept;
   if(mv.bulo)d*=1-mv.bulo;
   if(mv.suspend)d*=1-mv.suspend;
   if(t.vol.sub>0&&!mv.sound)d=Math.min(d,t.vol.sub)*.7;

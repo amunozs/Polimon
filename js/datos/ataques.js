@@ -560,6 +560,20 @@ const MOVES = {
     quip: 'Pone un tope a lo que le pueden cobrar.'
   },
 
+  flotilla: {
+    name: 'Flotilla a Gaza',
+    type: 'mit',
+    cat: 'P',
+    power: 140,
+    acc: 100,
+    pp: 5,
+    charge: 'mar',
+    intercept: .3,
+    chargeMsg: 'zarpa desde Barcelona con toda la prensa en el puerto. Llega en el próximo turno…',
+    desc: 'Un turno para zarpar y al siguiente llega con toda la flotilla: golpe muy fuerte. 30% de que la intercepten: no hace daño, pero vuelve como una heroína y le sube mucho el Ataque.',
+    quip: '¡Tierra a la vista… y cámaras también!'
+  },
+
   parlem: {
     name: 'Parlem',
     type: 'mit',

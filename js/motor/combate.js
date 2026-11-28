@@ -157,6 +157,14 @@ async function attack(s,mv,id){
     const vetoed=Math.random()<mv.veto;await fxRun(c=>fxVote(c,vetoed),s);
     if(vetoed){await say('¡El Congreso la tumba!','Habrá que volver a registrarla.');return;}
   }
+  if(mv.intercept&&Math.random()<mv.intercept){
+    await fxRun(fxInterceptada,s);
+    await say('¡La interceptan a 80 millas de la costa!','La flotilla no llega… pero ya hay un directo desde el aeropuerto.');
+    await fxRun(fxHeroina,s);
+    await say(`${label(u)} vuelve deportada y la reciben como a una heroína en El Prat.`,'Flores, aplausos y todas las cámaras.');
+    await boost(u,{atk:2},u);
+    return;
+  }
   let pre=null;
   if(t.p.ability==='maletero'&&!t.trunkUsed&&!(t.vol.sub>0)){const crit=(id==='fruta'&&t.p.id==='sanchez')||u.vol.isidoro>0||Math.random()<1/24||(mv.highCrit&&Math.random()<1/4);const roll=.85+Math.random()*.15;pre={crit,roll};
     if(calcDamage(u,t,mv,crit,roll)>=t.hp){t.trunkUsed=true;if(B.teams[1-s].some(m=>m!==t&&m.hp>0)){await trunkEscape(1-s);if(B.over)return;t=active(1-s);e=eff(mv.type,t.types);pre=null;}else{await koWarning(1-s);await abilityBanner(1-s,'MALETERO',`${t.name} intenta huir…`);await fxRun(c=>fxTrunk(c,false),1-s);await say('¡La policía para el coche antes de que arranque!',`Ya no le queda nadie que dé la cara por él: a ${t.name} le toca aguantar el golpe.`);}}}

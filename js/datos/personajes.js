@@ -191,7 +191,7 @@ const POL = [
     types: ['asa','res'],
     base: [74,94,131,54,116,20],
     ability: 'sindicalismo',
-    moves: ['desahucios','lucha','alquiler','parlem'],
+    moves: ['desahucios','lucha','alquiler','flotilla'],
     entry: '«Esta casa ahora es mía.»',
     ko: '«¡Esto es un desahucio!»'
   }
