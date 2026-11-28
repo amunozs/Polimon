@@ -208,3 +208,23 @@
 .swi .hp{margin-top:4px}
 .swi .avs{width:48px;height:48px}
 
+
+/* Gestión: carpeta con pegatinas y botones de elección */
+.gfold{position:absolute;left:0;top:0;width:156px;height:114px;background:linear-gradient(160deg,#f6dc8c,#e0b54a);border:3px solid var(--ink);border-radius:6px 12px 10px 10px;box-shadow:4px 4px 0 #0008;pointer-events:none;z-index:2}
+.gfold .gtab,.gbtn .gtab{position:absolute;top:-13px;left:12px;width:58px;height:14px;background:#f6dc8c;border:3px solid var(--ink);border-bottom:none;border-radius:8px 8px 0 0}
+.gico{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);font-size:34px;line-height:1}
+.glab{position:absolute;left:10px;right:10px;top:12px;padding:5px 0;text-align:center;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:1px;border:2px solid var(--ink);border-radius:4px;transform-origin:100% 0;white-space:nowrap}
+.glab.g{background:linear-gradient(135deg,#fff1a8,#d8a51c 55%,#fff6c4);color:#3a2a00;box-shadow:inset 0 0 0 2px #fff8}
+.glab.e{background:#c5ead1;color:#1d5131}
+.glab.a{background:#dcd7cb;color:#4a4a4a}
+.glab.r{background:#fff;color:#e5533d;border-color:#e5533d;font-size:17px}
+.glab.r::before,.glab.r::after{content:'';position:absolute;top:-6px;width:26px;height:10px;background:#d8c08e;opacity:.85}
+.glab.r::before{left:-8px;transform:rotate(-30deg)}.glab.r::after{right:-8px;transform:rotate(30deg)}
+.gchunk{position:absolute;border:2px solid var(--ink);border-radius:3px;z-index:3}
+.gbub{display:inline-block;background:#fff;color:#1c1a24;border:3px solid #1c1a24;border-radius:14px;padding:5px 12px;font-weight:800;white-space:nowrap}
+.gbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px 2px 2px}
+.gbtn{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 8px;background:linear-gradient(160deg,#f6dc8c,#e0b54a);border:3px solid var(--ink);border-radius:6px 12px 10px 10px;box-shadow:3px 3px 0 #0008;color:var(--ink);font:inherit;cursor:pointer}
+.gbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #0008}
+.gbtn .glbl{font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:1px;padding:3px 6px;border:2px solid var(--ink);border-radius:4px;background:linear-gradient(135deg,#fff1a8,#d8a51c 55%,#fff6c4);color:#3a2a00}
+.gbtn .gi{font-size:30px;line-height:1.1}
+.gbtn small{font-weight:800;font-size:12px}

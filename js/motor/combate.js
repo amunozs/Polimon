@@ -271,6 +271,7 @@ async function statusMove(s,mv,id){
   if(!accuracyOK(s,mv)){await say('¡El argumento no ha llegado!');return;}
   if(t.vol.sub>0){await say(`¡El chalet de ${label(t)} lo bloquea!`);return;}
   if(k==='swaphp')SND.sfx('whoosh');
+  if(k==='gestion')return gestion(s);
   await playFX(id,s);
   if(k==='par'||k==='brn'){
     if(mv.type==='gal'&&eff('gal',t.types)===0){await say(`No le afecta a ${label(t)}. Ni se inmuta.`);return;}

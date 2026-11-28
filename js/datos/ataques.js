@@ -83,6 +83,16 @@ const MOVES = {
     quip: 'Promete derogarlo todo.'
   },
 
+  gestion: {
+    name: 'Gestión',
+    type: 'gal',
+    cat: 'X',
+    pp: 10,
+    eff: {kind:'gestion'},
+    desc: 'Elige qué gestionar: Sanidad (le quita 1/4 de la vida al rival), Educación (le baja mucho el Ataque Esp.) o Pensiones (le baja mucho el Ataque).',
+    quip: '«Esto es gestión.»'
+  },
+
   lluvia: {
     name: 'Siempre llueve en Galicia',
     type: 'gal',
@@ -101,7 +111,7 @@ const MOVES = {
     power: 90,
     acc: 100,
     pp: 10,
-    desc: 'Golpe fuerte. Con lluvia, pega más.',
+    desc: 'Golpe fuerte.',
     quip: 'Una lancha cruza a toda velocidad.'
   },
 

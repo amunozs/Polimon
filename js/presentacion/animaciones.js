@@ -76,6 +76,66 @@ async function koFly(s){
   SND.sfx('laugh');
 }
 let REFC=null;
+/* ---- Gestión: la carpeta, las pegatinas y las tijeras ---- */
+const anim=(e,kf,d,o={})=>e.animate(kf,{duration:d*FXS(),easing:o.ease||'ease-out',delay:(o.delay||0)*FXS(),fill:'forwards'}).finished.catch(()=>{});
+function partido(html,at,size){ // dos mitades exactas de lo mismo, para cortarlas
+  return [0,1].map(h=>{const e=mk(`<span style="display:inline-block;clip-path:${h?'inset(0 0 0 50%)':'inset(0 50% 0 0)'}">${html}</span>`,size);e.style.transform=T(at);return e;});
+}
+async function fxGestion(c,i){
+  const f=$('#field'),W=f.clientWidth,H=f.clientHeight,G=GESTION[i];
+  const at=P(W/2,H*.45);
+  const fo=document.createElement('div');fo.className='gfold';
+  fo.innerHTML=`<span class="gtab"></span><div class="gico">${G.ico}</div><div class="glab r">RECORTES</div><div class="glab a">AUSTERIDAD</div><div class="glab e">EFICIENCIA</div><div class="glab g">GESTIÓN</div>`;
+  fo.style.transform=T(at,0);$('#fx').appendChild(fo);
+  SND.sfx('ding');
+  await anim(fo,[{transform:T(at,0,-14)},{transform:T(at,1.18,4),offset:.6},{transform:T(at,1,0)}],480);
+  await sleep(420);
+  // las pegatinas se despegan una a una
+  for(const k of ['g','e','a']){
+    const l=fo.querySelector('.glab.'+k);SND.sfx('peel');
+    await anim(l,[{transform:'none',opacity:1},{transform:'rotate(-7deg) translate(-3px,-3px)',opacity:1,offset:.3},{transform:'rotate(-40deg) translate(-80px,-60px)',opacity:0}],560,{ease:'ease-in'});
+    await sleep(k==='a'?200:110);
+  }
+  // debajo, lo de siempre
+  SND.sfx('thud');shake(300,6);
+  await anim(fo.querySelector('.glab.r'),[{transform:'scale(1)'},{transform:'scale(1.3) rotate(-3deg)',offset:.4},{transform:'scale(1) rotate(-3deg)'}],420);
+  await sleep(500);
+  // la carpeta se abre: dentro solo hay unas tijeras
+  const sc=up(at,8);
+  await all(anim(fo,[{transform:T(at,1)},{transform:T(at,1.05,-4),offset:.4},{transform:T(at,.3,14),opacity:0}],420),pop('✂️',sc,{size:64,d:520}));
+  if(i===0){ // Sanidad: le cortan un trozo de la barra de vida
+    const bar=$('#plate'+c.t+' .hp'),fill=bar&&bar.querySelector('i');
+    if(!fill)return;
+    const fr=f.getBoundingClientRect(),br=bar.getBoundingClientRect(),ir=fill.getBoundingClientRect();
+    const cw=Math.max(6,Math.min(ir.width,br.width*(c.frac||.25))),x1=ir.right-fr.left,x0=x1-cw,y=ir.top-fr.top+ir.height/2;
+    SND.sfx('whoosh');await fly('✂️',sc,P(x0,y-4),{d:480,size:40,spin:360,ease:'ease-in-out'});
+    SND.sfx('snip');
+    const ch=document.createElement('div');ch.className='gchunk';Object.assign(ch.style,{left:x0+'px',top:(ir.top-fr.top)+'px',width:cw+'px',height:ir.height+'px',background:getComputedStyle(fill).backgroundColor||'#3fb950'});
+    $('#fx').appendChild(ch);fill.style.width=Math.max(0,(ir.width-cw)/br.width*100)+'%';
+    await all(pop('✂️',P(x0,y-4),{size:34,d:420}),anim(ch,[{transform:'none',opacity:1},{transform:'translate(6px,-8px) rotate(-8deg)',opacity:1,offset:.2},{transform:'translate(26px,150px) rotate(70deg)',opacity:0}],1000,{ease:'ease-in'}),burst('✨',P(x0,y),{n:5,r:26,size:16,d:500}));
+  }else if(i===1){ // Educación: le cortan el discurso por la mitad
+    const bp=clampX(P(c.b.x-10,c.b.y+58),80);
+    const [L,R]=partido('<span class="gbub">bla, bla, bla…</span>',bp,15);
+    await all(anim(L,[{opacity:0,transform:T(bp,.4)},{opacity:1,transform:T(bp,1)}],260),anim(R,[{opacity:0,transform:T(bp,.4)},{opacity:1,transform:T(bp,1)}],260));
+    SND.sfx('whoosh');await fly('✂️',sc,up(bp,40),{d:420,size:40,spin:-180});
+    SND.sfx('snip');
+    await all(fly('✂️',up(bp,40),P(bp.x,bp.y+40),{d:260,size:40,ease:'linear'}),
+      anim(L,[{transform:T(bp)},{transform:T(P(bp.x-34,bp.y+120),1,-30),opacity:0}],900,{ease:'ease-in',delay:180}),
+      anim(R,[{transform:T(bp)},{transform:T(P(bp.x+34,bp.y+120),1,30),opacity:0}],900,{ease:'ease-in',delay:180}));
+  }else{ // Pensiones: parten la hucha
+    const hp=P(c.b.x,c.b.y-4);
+    const [L,R]=partido('🐷',hp,84);
+    SND.sfx('coin');
+    await all(anim(L,[{opacity:0,transform:T(hp,.3)},{opacity:1,transform:T(hp,1.1)},{opacity:1,transform:T(hp,1)}],380),anim(R,[{opacity:0,transform:T(hp,.3)},{opacity:1,transform:T(hp,1.1)},{opacity:1,transform:T(hp,1)}],380));
+    SND.sfx('whoosh');await fly('✂️',sc,up(hp,56),{d:440,size:42,spin:180});
+    SND.sfx('snip');SND.sfx('coins');
+    await all(fly('✂️',up(hp,56),P(hp.x,hp.y+50),{d:240,size:42,ease:'linear'}),
+      anim(L,[{transform:T(hp)},{transform:T(P(hp.x-40,hp.y+16),1,-28),offset:.5},{transform:T(P(hp.x-56,hp.y+70),1,-60),opacity:0}],1000,{delay:160}),
+      anim(R,[{transform:T(hp)},{transform:T(P(hp.x+40,hp.y+16),1,28),offset:.5},{transform:T(P(hp.x+56,hp.y+70),1,60),opacity:0}],1000,{delay:160}),
+      burst('🪙',hp,{n:9,r:80,size:22,d:900,delay:200}),rain('🪙',P(hp.x,hp.y+30),{n:6,spread:70,h:10,size:18,stagger:60,d:700,delay:300}));
+  }
+}
+
 /* ---- Piezas de la Flotilla a Gaza: mar, barcos y prensa ---- */
 const FLOTA=['⛵','⛵','🛥️','⛵','⛵'];
 const FLOTA_POS=[[0,0],[-34,-22],[30,-18],[-26,24],[36,20]];

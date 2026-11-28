@@ -8,6 +8,7 @@ JS="""async()=>{
   const swap=()=>{B.teams.reverse();B.act.reverse();B.sides.reverse();};
   getPlayerAction=function(){swap(); const a=aiChoose(); swap(); return Promise.resolve(a);};
   askSwitch=function(){swap(); const i=aiReplace(); swap(); return Promise.resolve(i);};
+  elegirGestion=function(s){return Promise.resolve(gestionIA(s));};
   return await new Promise(res=>{finish=w=>res(w);const ids=shuffle(POL.filter(p=>!p.legend).map(p=>p.id));startBattle(ids.slice(0,3));B.teams[1]=ids.slice(3,6).map(id=>makeMon(id,1));setSprite(1);renderPlates();});
 }"""
 async def one(b,errs,i):

@@ -70,7 +70,7 @@ const POL = [
     types: ['gal'],
     base: [90,75,85,115,90,55],
     ability: 'estatica',
-    moves: ['nisino','derogar','lluvia','barco'],
+    moves: ['nisino','derogar','gestion','barco'],
     entry: '«Depende de cómo se mire.»',
     ko: '«Técnicamente, he ganado.»'
   },
