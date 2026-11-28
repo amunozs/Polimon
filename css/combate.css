@@ -160,6 +160,8 @@
 .fxbeam{position:absolute;border-radius:99px;box-shadow:0 0 14px #ffffffaa}
 .fxring{position:absolute;border:5px solid;border-radius:50%;left:0;top:0}
 .fxflash{position:absolute;inset:0}
+.fxsea{position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:14px;opacity:0;background:repeating-linear-gradient(172deg,rgba(255,255,255,.14) 0 3px,transparent 3px 26px),linear-gradient(180deg,rgba(70,160,235,0) 0%,rgba(40,130,215,.4) 40%,rgba(15,80,165,.75) 100%);animation:fxsea 1.6s linear infinite}
+@keyframes fxsea{to{background-position:0 52px,0 0}}
 .lbox{position:absolute;left:0;right:0;height:0;background:#000;z-index:7}
 .vote{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-radius:10px;padding:8px 10px;z-index:8;text-align:center;box-shadow:4px 4px 0 #0008}
 .vote b{display:block;font-family:var(--display);font-size:14px;margin-bottom:6px}

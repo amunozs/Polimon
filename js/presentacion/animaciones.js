@@ -76,6 +76,38 @@ async function koFly(s){
   SND.sfx('laugh');
 }
 let REFC=null;
+/* ---- Piezas de la Flotilla a Gaza: mar, barcos y prensa ---- */
+const FLOTA=['⛵','⛵','🛥️','⛵','⛵'];
+const FLOTA_POS=[[0,0],[-34,-22],[30,-18],[-26,24],[36,20]];
+function seaOn(){const e=document.createElement('div');e.className='fxsea';$('#field').insertBefore(e,$('#wx'));e.animate([{opacity:0},{opacity:1}],{duration:450*FXS(),fill:'forwards'});return e;}
+function clampX(p,m=140){const W=$('#field').clientWidth;return P(Math.min(Math.max(p.x,m),W-m),p.y);}
+const popa=c=>P(c.a.x-(c.b.x>c.a.x?70:-70),c.a.y+40);
+const rumbo=c=>P((c.a.x+c.b.x)/2,(c.a.y+c.b.y)/2+10);
+function sail(gl,a,b,{d=1600,size=40,delay=0,bob=6,phase=0}={}){
+  const H=$('#field').clientHeight||400;const kf=[];const n=16;
+  for(let i=0;i<=n;i++){const t=i/n;const w=t*Math.PI*6+phase;const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t+Math.sin(w)*bob;
+    kf.push({transform:T(P(x,y),.75+.5*(y/H),Math.sin(w+1)*7),opacity:i===0?0:1});}
+  return run(mk(gl,size),kf,d,{delay,ease:'linear'});
+}
+function fleet(a,b,{d=1700,delay=0,size=38}={}){return Promise.all(FLOTA.map((g,i)=>{const[ox,oy]=FLOTA_POS[i];return sail(g,P(a.x+ox,a.y+oy),P(b.x+ox*.6,b.y+oy*.6),{d,size:i===2?size+8:size,delay:delay+i*90,phase:i*1.3});}));}
+async function press(at){const b=burst('📸',at,{n:6,r:62,size:22,d:700});for(let i=0;i<3;i++){SND.sfx('camera');flashScr('#ffffff',150);await sleep(190);}await b;}
+async function fxInterceptada(c){
+  SND.sfx('horn');seaOn();const m=rumbo(c),dir=c.b.x>c.a.x?1:-1;
+  await all(letterbox(3100),fleet(popa(c),m,{d:1300}),
+    sleep(1450).then(()=>{SND.sfx('siren');return all(
+      fly('🚢',P(c.b.x+dir*90,c.b.y),P(m.x+dir*62,m.y-14),{d:650,size:58,ease:'ease-out'}),
+      ...FLOTA.map((g,i)=>{const[ox,oy]=FLOTA_POS[i];const p=P(m.x+ox*.6,m.y+oy*.6);return run(mk(g,i===2?46:38),[{transform:T(p,1,0),opacity:1},{transform:T(P(p.x+3,p.y),1,-8),opacity:1,offset:.2},{transform:T(P(p.x-3,p.y),1,8),opacity:1,offset:.4},{transform:T(p,1,0),opacity:1,offset:.75},{transform:T(p,.9,0),opacity:0}],1500);}),
+      ring(m,{color:'#e5533d',size:70,d:700,delay:250}),ring(m,{color:'#e5533d',size:70,d:700,delay:650}),
+      stamp('INTERCEPTADA',clampX(up(m,64)),{d:1400,delay:450}));}));
+}
+async function fxHeroina(c){
+  const m=rumbo(c);SND.sfx('jet');
+  await fly('✈️',m,up(c.a,20),{d:900,size:46,arc:70,ease:'ease-in-out'});
+  SND.sfx('applause');
+  await all(press(c.a),burst(['🌹','👏','💐'],c.a,{n:10,r:78,size:26,d:1000}),rise('🌹',c.a,{n:6,spread:110,size:22}),
+    glow(c.s,'#ffd27a',1300),word('¡HEROÍNA!',clampX(up(c.a,86)),{color:'#f3c34d',size:32,d:1400}));
+}
+
 const FX={
   peugeot:async c=>{const dir=c.s===0?-1:1;await all(pop('🔑',up(c.a,50),{size:30,d:500}),glow(c.s,'#ffd27a',500));await sprA(c.s,[{opacity:1,transform:'none'},{opacity:0,transform:'scale(.6)'}],350);$('#sp'+c.s).classList.add('gone');await all(fly('🚗',P(c.a.x,c.a.y+30),P(c.a.x+dir*320,c.a.y+30),{d:900,size:42,ease:'ease-in'}),burst('💨',P(c.a.x,c.a.y+36),{n:5,r:30}));},
   peugeotBack:async c=>{const dir=c.s===0?-1:1;await fly('🚗',P(c.a.x+dir*320,c.a.y+30),P(c.a.x,c.a.y+30),{d:800,size:42,ease:'ease-out'});$('#sp'+c.s).classList.remove('gone');await all(sprA(c.s,[{opacity:0,transform:'scale(.6)'},{opacity:1,transform:'none'}],350),rise(['✨','💚'],c.a,{n:7}),word('¡HE VUELTO!',up(c.a,62),{size:22}));},
@@ -224,6 +256,13 @@ const FX={
   vecino:async c=>{await word('¿Peor? ¿Mejor?',up(c.b,62),{size:20,d:800});await all(zigzag(P(c.b.x-30,c.b.y-110),c.b,{d:400}),zigzag(P(c.b.x+30,c.b.y-110),c.b,{d:400,delay:150}),zigzag(P(c.b.x,c.b.y-120),c.b,{d:400,delay:300}),flashScr('#fff3a0',260,250));},
   plasma:async c=>{await pop('📺',c.a,{size:30,d:400});await all(fly('🌪️',c.a,c.b,{d:600,size:34,spin:360}),tint(c.t,'grayscale(1) contrast(2.2)',900,350),burst('📡',c.b,{n:4,size:20,delay:450}));},
   rescate:async c=>{await all(rain(['💶','💵','💶'],P(c.a.x,c.a.y),{n:12,size:24,spread:180,stagger:50,h:160}),word('¡RESCATE!',up(c.a,64),{size:26,d:1100}),glow(c.s,'#7dff9a',1100));},
+  flotilla:async c=>{const f=$('#field');seaOn();
+    await all(letterbox(3000),word('LA FLOTILLA',P(f.clientWidth/2,f.clientHeight*.3),{color:'#5bc0ff',size:30,d:1500,rot:-3}),
+      fleet(popa(c),c.b,{d:1700,delay:150}),
+      rain('🌊',rumbo(c),{n:8,size:22,spread:220,h:30,stagger:130,d:700,delay:200}),
+      sleep(1750).then(()=>all(shake(650,14),flashScr('#cdeeff',380),burst(['🌊','💦','⛵'],c.b,{n:12,r:95,size:30,d:900}),
+        ring(c.b,{color:'#5bc0ff',size:70,d:800}),ring(c.b,{color:'#ffffff',size:40,d:800,delay:150}),
+        word('¡TIERRA A LA VISTA!',clampX(P(c.b.x,c.b.y+78)),{color:'#ffe066',size:22,d:1100}))));},
   desahucios:async c=>{await all(pop('🪧',up(c.a,40),{size:70,d:900}),word('STOP DESAHUCIOS',up(c.a,90),{color:'#7dbb62',size:20,d:1100}),letterbox(1200));await all(lunge(c,{dist:70}),shake(500,10));await burst(['📢','✊'],c.b,{n:6,size:24});},
   lucha:async c=>{await all(pop('🚩',up(c.a,58),{size:40,d:700}),glow(c.t,'#e5533d',600));await all(fly('✊',c.b,P(c.b.x,c.b.y-60),{d:300,size:30,ease:'ease-out'}));await all(fly('🔧',c.a,c.b,{d:420,size:36,spin:540}),lunge(c,{dist:50}));await all(burst('💥',c.b,{n:5}),shake(400,8));},
   alquiler:async c=>{await all(pop('🏷️',up(c.a,58),{size:44,d:900}),word('TOPE',up(c.a,20),{color:'#7dbb62',size:30,d:1000}),ring(c.a,{color:'#7dbb62'}));},
@@ -249,6 +288,7 @@ const FX={
 };
 const PERHIT={votos:c=>burst(['🗳️','📄'],c.b,{n:3,size:20,r:40,d:350}),referendum:c=>{if(REFC){const b=REFC.querySelector('b');const v=Math.min(91,(parseInt(b.textContent)||0)+12+rnd(14));b.textContent=v+'%';REFC.animate([{transform:'scale(1.2)'},{transform:'none'}],{duration:200});}SND.sfx('blipbeep');return all(fly('📄',up(c.a,30),up(c.b,40),{d:320,size:22,arc:50,spin:120}),burst('🗳️',c.b,{n:3,size:20,r:36,d:350,delay:250}));},impresora:c=>{SND.sfx('brrt');return fly(`<div class="folio">${esc(FOLIOS[rnd(FOLIOS.length)])}</div>`,up(c.a,40),P(c.b.x+(Math.random()-.5)*30,c.b.y-10),{d:420,size:12,spin:(Math.random()<.5?-1:1)*200,arc:40,ease:'ease-in'});}};
 const FXC={
+  flotilla:async c=>{SND.sfx('horn');const dir=c.b.x>c.a.x?1:-1;seaOn();await all(press(c.a),pop('⛵',P(c.a.x+dir*58,c.a.y+26),{size:54,d:1500}),word('¡ZARPAMOS!',clampX(up(c.a,84)),{color:'#5bc0ff',size:28,d:1400}),rise('📢',c.a,{n:3,spread:90,size:20}));},
   jornada:async c=>{await pop('📜',up(c.a,60),{size:40,d:700});await pop('🏛️',P(c.a.x+44,c.a.y-40),{size:30,d:700});}
 };
 function crowd(){const c=$('#crowd');if(!c||RM)return;c.classList.remove('cheer');void c.offsetWidth;c.classList.add('cheer');}
@@ -322,7 +362,7 @@ async function fxRun(fn,s,extra){
   if(!fn||RM||SPEED===0)return;
   const c={a:ctr(s),b:ctr(1-s),s,t:1-s,...(extra||{})};
   try{await fn(c);}catch(e){console.error(e);}
-  $('#fx').innerHTML='';
+  $('#fx').innerHTML='';document.querySelectorAll('.fxsea').forEach(e=>e.remove());
 }
 const playFX=(id,s)=>{SND.move(id);const f=FX[id];return fxRun(Array.isArray(f)?f[rnd(f.length)]:f,s);};
 const applaud=s=>{SND.sfx('applause');return fxRun(async c=>{await all(rise('👏',c.a,{n:6,size:22,spread:130,stagger:50,d:800}),word('¡OLÉ!',up(c.a,62),{size:24,d:700}));},s);};

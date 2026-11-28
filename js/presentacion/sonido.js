@@ -79,6 +79,7 @@ const SND=(()=>{
       const bar=[['E3',['E4','G4','B4']],['G3',['D5','B4','G4']],['A3',['C5','E5','A4']],['B3',['B4','Ds5','Fs4']],['D4',['D5','A4','Fs4']],['E3',['E5','B4','G4']]];
       let t=0;for(const[b,ch]of bar){tone({f:N[b],d:.5,type:'triangle',v:.35,t});ch.forEach((n,i)=>tone({f:N[n],d:.16,type:'square',v:.11,t:t+i*.17}));t+=.52;}
       tone({f:N.E4,d:.6,type:'square',v:.16,t});tone({f:N.E3,d:.6,type:'triangle',v:.35,t});},
+    horn:()=>{tone({f:98,d:1.1,type:'sawtooth',v:.32,att:.06});tone({f:147,d:1.1,type:'square',v:.12,att:.06});tone({f:98,d:.9,type:'sawtooth',v:.32,att:.06,t:1.25});tone({f:147,d:.9,type:'square',v:.12,att:.06,t:1.25});},
     siren:()=>{for(let i=0;i<4;i++){tone({f:960,d:.22,type:'square',v:.14,t:i*.44});tone({f:770,d:.22,type:'square',v:.14,t:i*.44+.22});}},
     screech:()=>{noise({d:.6,v:.45,f:2600,f2:1600,q:6});tone({f:1900,f2:1300,d:.55,type:'sawtooth',v:.08});},
     fanfare:()=>arp(['C5','E5','G5','C6','G5','C6'],{d:.14,v:.35,gap:.11}),
@@ -121,7 +122,7 @@ const SND=(()=>{
   };
   const MOVE={falcon:'jet',barco:'engine',peugeot:'engine',peugeotBack:'engine',zasca:'slap',tezanazo:'thud',lluvia:'rain',cana:'pop',publico:'applause',fruta:'pops',
     referendum:'thud',impresora:'printer',alcalde:'wobble',dondedije:'wobble',m360:'wobble',rescate:'coins',independencia:'fanfare',derechita:'cluck',huelga:'whistle',
-    calderon:'chant',parlem:'chime',desahucios:'megaphone',caganer:'prrt',maletero:'door',chalet:'build',purga:'gong',comunismo:'fire',verbena:'fireworks',
+    calderon:'chant',parlem:'chime',flotilla:'horn',desahucios:'megaphone',caganer:'prrt',maletero:'door',chalet:'build',purga:'gong',comunismo:'fire',verbena:'fireworks',
     obras:'drill',cambio:'whoosh',otan:'door',isidoro:'whoosh',rosa:'thud',giratoria:'door',ave:'jet',votos:'printer',hijo:'chant',plasma:'static',vecino:'zap',derogar:'zap',nisino:'zap',chiringuitos:'lock',captura:'camera',tuit3am:'tweet',escucha:'chime',sonrisa:'heal',
     asaltar:'whoosh',casta:'whoosh',jornada:'fanfare',lucha:'thud',alquiler:'lock',bocata:'pop',mitinmadrid:'fire',caballo:'thud',pataleta:'thud'};
   // Música: corcheas; melodía y bajo originales
