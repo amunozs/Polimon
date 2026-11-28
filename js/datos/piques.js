@@ -40,6 +40,11 @@ const RIV = {
     ['colau','«Y tú, fuera de mi barrio.»']
   ],
 
+  'colau|feijoo': [
+    ['colau','«¿Y lo de Mazón, qué?»'],
+    ['feijoo','«Usted, calladita.»']
+  ],
+
   'colau|puigdemont': [
     ['colau','«Ni DUI ni 155.»'],
     ['puigdemont','«Equidistante.»']

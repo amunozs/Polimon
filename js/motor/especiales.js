@@ -259,3 +259,46 @@ async function trunkEscape(s){
   await fxRun(c=>all(word('¡TE TOCA!',up(c.a,80),{color:'#ff7a7a',size:22,d:900}),sprA(c.s,[{transform:'none'},{transform:'translateY(-8px) rotate(-6deg)'},{transform:'rotate(6deg)'},{transform:'none'}],600)),s);
   await say(`¡${n.name} da la cara por ${m.name}… y se come el golpe!`);
 }
+
+
+/* =====================================================================
+   GESTIÓN de Núñez Fariña: se elige una carpeta y, sea cual sea, es un recorte.
+   ===================================================================== */
+const GESTION=[
+  {id:'sanidad',  n:'Sanidad',   ico:'🏥'},
+  {id:'educacion',n:'Educación', ico:'🎓'},
+  {id:'pensiones',n:'Pensiones', ico:'🐷'}
+];
+// Cómo elige la máquina (y las pruebas automáticas)
+function gestionIA(s){
+  const foe=active(1-s);
+  if(s===1&&CONFIG.rival!=='listo')return rnd(3);
+  if(foe.hp<=Math.floor(foe.max/4))return 0;
+  if(foe.st.atk>=foe.st.spa&&foe.stages.atk>-4)return 2;
+  if(foe.stages.spa>-4)return 1;
+  return 0;
+}
+// El jugador elige carpeta en los botones de abajo
+function elegirGestion(s){
+  if(s!==0||SPEED===0)return Promise.resolve(gestionIA(s));
+  return new Promise(res=>{
+    $('#msgText').textContent=`¿Qué gestiona ${active(0).name}?`;$('#msgSub').hidden=true;$('#msg').classList.remove('ready','tweet','tilt');
+    $('#controls').className='controls';
+    $('#controls').innerHTML=`<div class="gbtns">${GESTION.map((g,i)=>`<button class="gbtn" type="button" data-i="${i}"><span class="gtab"></span><span class="glbl">GESTIÓN</span><span class="gi">${g.ico}</span><small>${g.n}</small></button>`).join('')}</div>`;
+    $('#controls').querySelectorAll('.gbtn').forEach(b=>b.onclick=()=>{SND.sfx('blip');waitControls();$('#msgText').textContent=`${active(0).name} firma el plan de ${GESTION[+b.dataset.i].n}.`;res(+b.dataset.i);});
+  });
+}
+async function gestion(s){
+  const u=active(s),t=active(1-s);
+  const i=await elegirGestion(s);const g=GESTION[i];
+  const d=i===0?Math.min(t.hp,Math.max(1,Math.floor(t.max/4))):0;
+  await fxRun(c=>fxGestion(c,i),s,{frac:d/t.max});
+  if(i===0){
+    hurt(t,d);if(t.hp<=0)B.lastKO={by:u,victim:t,move:'Gestión'};flash(1-s);renderPlates();
+    await say(`Recorte en ${g.n}.`,`${label(t)} pierde ${d} PS.`);
+    await resistCheck();
+  }else{
+    await say(`Recorte en ${g.n}.`,i===2?'Se vacía la hucha de las pensiones.':null);
+    await boost(t,i===1?{spa:-2}:{atk:-2},u);
+  }
+}

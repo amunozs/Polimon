@@ -86,6 +86,7 @@ function aiChooseListo(){
       else if(k==='isidoro')sc=me.vol.isidoro>0?0:30;
       else if(k==='swaphp')sc=foeAway?0:Math.max(0,(foe.hp/foe.max-hpF)*130);
       else if(k==='cap')sc=(!me.vol.cap&&threat>.3)?30:2;
+      else if(k==='gestion')sc=foeAway?0:(foe.hp<=foe.max/4?80:30);
       else if(k==='parlem')sc=(foeAway||foe.vol.parlem||me.vol.parlemCount)?0:24;
       else if(k==='rescate')sc=B.sides[1].rescate?0:(B.teams[1].some(m=>m.hp<=0)?72:(hpF<.45?50:0));
       else if(k==='weather')sc=B.field.w===mv.eff.w?0:24;

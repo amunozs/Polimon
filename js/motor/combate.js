@@ -271,6 +271,7 @@ async function statusMove(s,mv,id){
   if(!accuracyOK(s,mv)){await say('¡El argumento no ha llegado!');return;}
   if(t.vol.sub>0){await say(`¡El chalet de ${label(t)} lo bloquea!`);return;}
   if(k==='swaphp')SND.sfx('whoosh');
+  if(k==='gestion')return gestion(s);
   await playFX(id,s);
   if(k==='par'||k==='brn'){
     if(mv.type==='gal'&&eff('gal',t.types)===0){await say(`No le afecta a ${label(t)}. Ni se inmuta.`);return;}
@@ -338,7 +339,9 @@ async function checkRivalry(){
   const k=rivKey(a.p.id,b.p.id),r=RIV[k];if(!r||B.rivSeen.has(k))return;
   B.rivSeen.add(k);
   clearBubbles();
-  for(const[id,line]of r){const m=a.p.id===id?a:b;await say(`💬 ${label(m)}`,null,{bub:{s:m===a?0:1,m,line,keep:1}});}
+  for(const[id,line]of r){const m=a.p.id===id?a:b;
+    if(k==='colau|feijoo'&&id==='feijoo'){const ada=a.p.id==='colau'?0:1;SND.sfx('blip');fxRun(c=>all(pop('🤫',up(c.a,10),{size:96,d:1600}),word('¡CHSSST!',up(c.a,78),{color:'#e5533d',size:26,d:1500})),ada);}
+    await say(`💬 ${label(m)}`,null,{bub:{s:m===a?0:1,m,line,keep:1}});}
   await say('¡Hay pique!',k==='ayuso|sanchez'?'Los dos pegan un 20% más, y «Me gusta la fruta» siempre es crítico contra Perro Sanxe.':'En esta rivalidad, los dos pegan un 20% más.');
   clearBubbles();
 }

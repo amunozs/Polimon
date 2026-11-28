@@ -79,6 +79,8 @@ const SND=(()=>{
       const bar=[['E3',['E4','G4','B4']],['G3',['D5','B4','G4']],['A3',['C5','E5','A4']],['B3',['B4','Ds5','Fs4']],['D4',['D5','A4','Fs4']],['E3',['E5','B4','G4']]];
       let t=0;for(const[b,ch]of bar){tone({f:N[b],d:.5,type:'triangle',v:.35,t});ch.forEach((n,i)=>tone({f:N[n],d:.16,type:'square',v:.11,t:t+i*.17}));t+=.52;}
       tone({f:N.E4,d:.6,type:'square',v:.16,t});tone({f:N.E3,d:.6,type:'triangle',v:.35,t});},
+    peel:()=>noise({d:.28,v:.45,f:3200,f2:700,q:1.2}),
+    snip:()=>{noise({d:.05,v:.7,f:5200,q:5});tone({f:2600,d:.04,v:.2});noise({d:.05,v:.7,f:5200,q:5,t:.11});tone({f:2600,d:.04,v:.2,t:.11});},
     horn:()=>{tone({f:98,d:1.1,type:'sawtooth',v:.32,att:.06});tone({f:147,d:1.1,type:'square',v:.12,att:.06});tone({f:98,d:.9,type:'sawtooth',v:.32,att:.06,t:1.25});tone({f:147,d:.9,type:'square',v:.12,att:.06,t:1.25});},
     siren:()=>{for(let i=0;i<4;i++){tone({f:960,d:.22,type:'square',v:.14,t:i*.44});tone({f:770,d:.22,type:'square',v:.14,t:i*.44+.22});}},
     screech:()=>{noise({d:.6,v:.45,f:2600,f2:1600,q:6});tone({f:1900,f2:1300,d:.55,type:'sawtooth',v:.08});},
