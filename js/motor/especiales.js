@@ -222,11 +222,18 @@ async function fxTrunk(c,escape){
       rain('💨',P(at.x,y+8),{n:6,size:22,spread:90,h:6,stagger:50,d:600}),word('BRRRUM',P(W/2,y-30),{size:22,d:800,delay:150}));
     await sleep(500);
   }else{
-    SND.sfx('pops');
-    await all(rain('🗳️',P(at.x,y-10),{n:7,size:26,spread:70,h:-30,stagger:50,d:700}),word('¡NO CABE!',up(at,70),{color:'#ff7a7a',size:22,d:1000}),word('lleno de urnas',up(at,40),{color:'#fff',size:14,d:1000,delay:150}));
-    lid.animate([{transform:`rotate(${dir>0?-110:110}deg)`},{transform:'rotate(0deg)'}],{duration:150*FXS(),fill:'forwards'});
-    await car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?W+90:-90,y),1,0)}],{duration:600*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{});
-    await sprA(c.s,[{transform:'none'},{transform:'rotate(-6deg) translateY(4px)'},{transform:'none'}],500);
+    // Último del equipo: la policía le corta el paso
+    SND.sfx('siren');
+    const fl=document.createElement('div');fl.className='fxflash';fl.style.opacity='0';$('#fx').appendChild(fl);
+    fl.animate([{opacity:0,background:'#e5333d'},{opacity:.28,background:'#e5333d',offset:.25},{opacity:.28,background:'#2f6bff',offset:.5},{opacity:.28,background:'#e5333d',offset:.75},{opacity:0,background:'#2f6bff'}],{duration:1400*FXS(),iterations:1});
+    const pol=mk(`<span style="display:inline-block;font-size:70px;transform:scaleX(${dir>0?1:-1})">🚓</span>`,16);pol.style.opacity='1';
+    const pfrom=P(c.s===0?W+80:-80,y),pat=P(at.x+dir*96,y);
+    await all(pol.animate([{transform:T(pfrom,1,0)},{transform:T(pat,1,0)}],{duration:600*FXS(),easing:'ease-out',fill:'forwards'}).finished.catch(()=>{}),
+      word('¡ALTO, POLICÍA!',P(W/2,y-70),{color:'#fff',size:24,d:1500,delay:250}));
+    lid.animate([{transform:`rotate(${dir>0?-110:110}deg)`},{transform:'rotate(0deg)'}],{duration:150*FXS(),fill:'forwards'});SND.sfx('thud');
+    await all(pop('🚫',up(at,44),{size:40,d:900}),sprA(c.s,[{transform:'none'},{transform:'translateY(-8px) rotate(-6deg)'},{transform:'rotate(6deg)'},{transform:'none'}],600),word('¡NO TE VAS!',up(c.a,80),{color:'#ff7a7a',size:20,d:900}));
+    await all(car.animate([{transform:T(at,1,0)},{transform:T(P(c.s===0?-90:W+90,y),1,0)}],{duration:600*FXS(),easing:'ease-in',fill:'forwards'}).finished.catch(()=>{}),
+      pol.animate([{transform:T(pat,1,0)},{transform:T(pat,1,0)}],{duration:600*FXS(),fill:'forwards'}).finished.catch(()=>{}));
   }
 }
 async function koWarning(s){
@@ -244,7 +251,8 @@ async function trunkEscape(s){
   await abilityBanner(s,'MALETERO',`${m.name} no piensa dar la cara`);
   await fxRun(c=>fxTrunk(c,true),s);
   spriteOut(s);$('#sp'+s).style.opacity='';
-  await say(`¡${m.name} huye en un maletero rumbo a Waterloo!`,'🚗 Se salva… y deja a otro dando la cara.');
+  m.hp=0;m.fled=true;m.status=null;renderPlates();
+  await say(`¡${m.name} huye en un maletero rumbo a Waterloo!`,'🚗 Se salva del golpe… pero ya no vuelve a este debate. Y deja a otro dando la cara.');
   const idx=s===0?await askSwitch(true):aiReplace();
   await doSwitch(s,idx,true);
   const n=active(s);

@@ -17,7 +17,7 @@ No hace falta instalar nada: haz **doble clic en `index.html`** y se abre en el 
 
 ```
 index.html              estructura de la página (pantallas y botones)
-config.js               ajustes generales: versión, botón de café, plataforma
+config.js               ajustes generales: versión, rival fácil o listo, botón de café, plataforma
 css/
   base.css              colores, tipografía, pantalla de selección
   combate.css           plató, personajes, barras, mensajes, bocadillos, efectos
@@ -33,7 +33,7 @@ js/
   motor/
     combate.js          daño, turnos, estados, cambios, KO
     especiales.js       borrachera de Isabel, Resistencia de Sanxe, Chaqueta de pana, Culpar a los menas
-    ia.js               cómo juega la máquina
+    ia.js               cómo juega la máquina (rival fácil y rival listo)
   presentacion/
     sonido.js           música y efectos (sintetizados, sin ficheros de audio)
     animaciones.js      piezas de animación y FX de cada ataque
@@ -67,6 +67,8 @@ Los ficheros se cargan en ese orden desde `index.html`. Todos comparten las mism
    - grito en `CRY` y sonido del ataque en `MOVE` dentro de `js/presentacion/sonido.js`;
    - piques en `js/datos/piques.js`.
 5. Prueba con `pruebas/equilibrio.py` que no queda ni muy fuerte ni muy flojo (lo normal: entre el 43% y el 60%).
+
+**Cambiar la dificultad:** `config.js` → `rival`. Con `'facil'` la máquina ataca al azar (descarta los ataques que no afectan y curarse con la vida llena), nunca cambia de polímon por gusto y, si le eliminan uno, saca otro al azar. Con `'listo'` vuelve el rival que calcula daños y cambia cuando le conviene.
 
 ## Entornos
 

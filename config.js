@@ -14,6 +14,9 @@ const CONFIG = {
     url: ''
   },
 
+  // Rival: 'facil' (ataca al azar, para jugadores casuales) o 'listo' (calcula y cambia de polímon).
+  rival: 'facil',
+
   // Estadísticas anónimas con GoatCounter (sin cookies ni datos personales).
   // codigo: el nombre de tu cuenta (https://<codigo>.goatcounter.com). Solo cuenta en el dominio indicado,
   // así que preproducción y las pruebas en tu ordenador no ensucian los datos.
